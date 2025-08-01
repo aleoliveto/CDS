@@ -1,0 +1,300 @@
+/* ---------- Global Layout ---------- */
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background: #121212;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+/* ---------- Root Game Layout ---------- */
+
+.game-container {
+  background: #121212;
+  color: #f0f0f0;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 1200px;
+  padding: 2rem 1rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* ---------- HUD Bar ---------- */
+
+.hud-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: #1e1e1e;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  border: 1px solid #333;
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  box-shadow: 0 0 6px #00000080;
+}
+
+/* ---------- Timeline Navigation ---------- */
+
+.timeline {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.timeline-step {
+  padding: 0.5rem 0.75rem;
+  background: #292929;
+  border: 1px solid #444;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #ccc;
+  text-align: center;
+  text-transform: uppercase;
+  transition: 0.3s;
+  cursor: default;
+}
+
+.timeline-step.active {
+  background: #ff6600;
+  color: #fff;
+  box-shadow: 0 0 10px #ff660088;
+}
+
+/* ---------- Event Feed ---------- */
+
+.event-feed {
+  background: #1b1b1b;
+  border: 1px solid #333;
+  padding: 1rem;
+  width: 100%;
+  max-width: 1000px;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  overflow-y: auto;
+  max-height: 250px;
+  scrollbar-width: thin;
+  scrollbar-color: #ff6600 #1b1b1b;
+}
+
+.event-feed::-webkit-scrollbar {
+  width: 8px;
+}
+
+.event-feed::-webkit-scrollbar-thumb {
+  background-color: #ff6600;
+  border-radius: 4px;
+}
+
+.event-feed h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #ff6600;
+}
+
+.event-msg {
+  background: #262626;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border-left: 4px solid #ff6600;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+/* ---------- Cockpit Tools ---------- */
+
+.tools-panel {
+  background: #222;
+  border: 1px solid #333;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 2rem;
+}
+
+.tools-panel h3 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: #ffa500;
+  margin-bottom: 1rem;
+}
+
+.cockpit-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tool-item {
+  display: flex;
+  align-items: center;
+  font-size: 1.05rem;
+  background: #2a2a2a;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.25s ease;
+}
+
+.tool-item:hover {
+  background-color: #3a3a3a;
+}
+
+.tool-item input[type="checkbox"] {
+  margin-right: 1rem;
+  transform: scale(1.25);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* ---------- Advance Button ---------- */
+
+.advance-phase {
+  margin: 2rem 0 2.5rem;
+  text-align: center;
+}
+
+.advance-phase button {
+  width: 220px;
+  font-size: 1.15rem;
+  padding: 0.85rem 1.5rem;
+  background: #ff6600;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 5px 10px #ff660033;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.advance-phase button:hover {
+  background-color: #e65c00;
+  box-shadow: 0 8px 15px #ff660055;
+}
+
+/* ---------- Captain Log ---------- */
+
+.log-panel {
+  width: 100%;
+  max-width: 1000px;
+  background: #161616;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+  font-size: 0.9rem;
+  color: #bbb;
+  margin-bottom: 3rem;
+  max-height: 250px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ff6600 #161616;
+}
+
+.log-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.log-panel::-webkit-scrollbar-thumb {
+  background-color: #ff6600;
+  border-radius: 4px;
+}
+
+.log-panel h4 {
+  margin-top: 0;
+  font-size: 1.15rem;
+  color: #ffa500;
+  margin-bottom: 1rem;
+}
+
+.log-panel ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  line-height: 1.5;
+}
+
+/* ---------- Modal Overlay ---------- */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* ---------- Modal Content ---------- */
+
+.modal-content {
+  background: #222;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 0 25px #ff6600cc;
+  color: white;
+}
+
+/* ---------- Modal Close Button ---------- */
+
+.modal-close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 2.2rem;
+  color: #ff6600;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* ---------- Modal Choice Buttons ---------- */
+
+.modal-choice-btn {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 1.05rem;
+  background-color: #ff6600;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+}
+
+.modal-choice-btn:hover {
+  background-color: #e65c00;
+}

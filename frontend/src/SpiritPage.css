@@ -1,0 +1,85 @@
+.spirit-page {
+  max-width: 900px;
+  margin: 2rem auto;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  color: #333;
+  text-align: center;
+}
+
+.page-title {
+  margin-bottom: 1rem;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto 2rem;
+}
+
+.spirit-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Position dropdowns where the orange boxes are on your image */
+/* These top/left values will need to be adjusted exactly */
+
+.dropdown {
+  position: absolute;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  border: 1px solid #ff6600;
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+  width: 220px;
+}
+
+/* Adjust these based on your image layout */
+
+.beOrange {
+  top: 125px;  /* adjust this */
+  left: 280px; /* adjust this */
+}
+
+.beSafe {
+  top: 190px;
+  left: 45px;
+  width: 180px;
+}
+
+.beChallenging {
+  top: 190px;
+  left: 330px;
+  width: 180px;
+}
+
+.beBold {
+  top: 190px;
+  left: 580px;
+  width: 180px;
+}
+
+.beWelcoming {
+  top: 190px;
+  left: 825px;
+  width: 180px;
+}
+
+.submit-btn {
+  background-color: #ff6600;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #e65c00;
+}
