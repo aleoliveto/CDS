@@ -4,7 +4,7 @@ import "../FlightDeck.css";
 import CockpitTools from "../components/CockpitTools";
 import { supabase } from "../supabaseClient";
 
-const EVENT_DURATION_SECONDS = 120; // 2 minutes per event
+const EVENT_DURATION_SECONDS = 120;
 
 export default function Game() {
   const [currentPhase, setCurrentPhase] = useState(0);
@@ -17,6 +17,7 @@ export default function Game() {
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [fetchError, setFetchError] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
   const timerRef = useRef(null);
 
   const [captain] = useState({
@@ -25,6 +26,7 @@ export default function Game() {
     aircraft: "G-EZUK",
   });
 
+  // Fetch events and listen for updates
   useEffect(() => {
     const fetchEvents = async () => {
       setLoadingEvents(true);
@@ -40,9 +42,10 @@ export default function Game() {
         setEventFeed(data);
         if (data && data.length > 0) setActiveEvent(data[0]);
       } else {
-        console.error("Failed to fetch events:", error);
         setFetchError("Failed to load events. Please try again later.");
+        console.error(error.message);
       }
+
       setLoadingEvents(false);
     };
 
@@ -50,80 +53,87 @@ export default function Game() {
 
     const channel = supabase.channel(`game-${captain.base}`);
 
-    // Listen to new events
-    channel.on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "events",
-        filter: `base=eq.${captain.base},phase=eq.${GAME_PHASES[currentPhase]}`,
-      },
-      (payload) => {
-        setEventFeed((prev) => [payload.new, ...prev]);
-        if (!activeEvent) setActiveEvent(payload.new);
-      }
-    );
+    channel
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "events",
+          filter: `base=eq.${captain.base},phase=eq.${GAME_PHASES[currentPhase]}`,
+        },
+        (payload) => {
+          const newEvent = payload.new;
 
-    // Listen to phase changes
-    channel.on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "game_state",
-        filter: `base=eq.${captain.base}`,
-      },
-      (payload) => {
-        setCurrentPhase(payload.new.phase_index);
-        setEventFeed([]);
-        setActiveEvent(null);
-        setTimeLeft(EVENT_DURATION_SECONDS);
-        setIsModalOpen(false);
-        setLog((prev) => [
-          ...prev,
-          `✈ Phase updated remotely to "${GAME_PHASES[payload.new.phase_index]}"`,
-        ]);
-      }
-    );
+          setEventFeed((prev) => {
+            const alreadyExists = prev.some((e) => e.id === newEvent.id);
+            if (alreadyExists) return prev;
+            return [newEvent, ...prev];
+          });
 
-    // Listen to lock/unlock
-    channel.on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "locks",
-        filter: `base=eq.${captain.base}`,
-      },
-      (payload) => {
-        const locked = payload.new.is_locked;
-        setIsLocked(locked);
-        setIsModalOpen(false);
-        setActiveEvent(null);
-        setTimeLeft(EVENT_DURATION_SECONDS);
-        setLog((prev) => [
-          ...prev,
-          locked
-            ? "🚫 Admin locked the game. Waiting for unlock."
-            : "✅ Game unlocked by Admin. You may resume.",
-        ]);
-      }
-    );
-
-    channel.subscribe();
+          if (!activeEvent && !isModalOpen && !isLocked) {
+            setActiveEvent(newEvent);
+          } else {
+            setToastMessage("📣 New event received!");
+            setTimeout(() => setToastMessage(null), 3000);
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "game_state",
+          filter: `base=eq.${captain.base}`,
+        },
+        (payload) => {
+          setCurrentPhase(payload.new.phase_index);
+          setEventFeed([]);
+          setActiveEvent(null);
+          setTimeLeft(EVENT_DURATION_SECONDS);
+          setIsModalOpen(false);
+          setLog((prev) => [
+            ...prev,
+            `✈ Phase updated remotely to "${GAME_PHASES[payload.new.phase_index]}"`,
+          ]);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "locks",
+          filter: `base=eq.${captain.base}`,
+        },
+        (payload) => {
+          const locked = payload.new.is_locked;
+          setIsLocked(locked);
+          setIsModalOpen(false);
+          setActiveEvent(null);
+          setTimeLeft(EVENT_DURATION_SECONDS);
+          setLog((prev) => [
+            ...prev,
+            locked
+              ? "🚫 Admin locked the game. Waiting for unlock."
+              : "✅ Game unlocked by Admin. You may resume.",
+          ]);
+        }
+      )
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [captain.base, currentPhase, activeEvent]);
+  }, [captain.base, currentPhase, activeEvent, isModalOpen, isLocked]);
 
   useEffect(() => {
     if (
       activeEvent &&
       activeEvent.choices &&
       activeEvent.choices.length > 0 &&
-      currentPhase !== 1 // Prevent showing modal in Pre-flight phase
+      currentPhase !== 1
     ) {
       setIsModalOpen(true);
       setTimeLeft(EVENT_DURATION_SECONDS);
@@ -160,12 +170,10 @@ export default function Game() {
 
   const handleEventChoice = (choice) => {
     setScore((prev) => prev + choice.score);
-
     setLog((prev) => [
       ...prev,
       `${GAME_PHASES[currentPhase]}: Event "${activeEvent.message}" - Choice: "${choice.text}" (+${choice.score})`,
     ]);
-
     setIsModalOpen(false);
     setActiveEvent(null);
   };
@@ -198,12 +206,34 @@ export default function Game() {
   };
 
   const formatTime = (seconds) =>
-    `${Math.floor(seconds / 60)
+    `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${(seconds % 60)
       .toString()
-      .padStart(2, "0")}:${(seconds % 60).toString().padStart(2, "0")}`;
+      .padStart(2, "0")}`;
 
   return (
     <div className="game-container" role="main">
+      {/* Toast notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: "fixed",
+            top: "1rem",
+            right: "1rem",
+            backgroundColor: "#ff6600",
+            color: "#fff",
+            padding: "1rem",
+            borderRadius: "0.5rem",
+            boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+            zIndex: 9999,
+            fontWeight: "bold",
+            animation: "fadein 0.3s ease-out",
+          }}
+        >
+          {toastMessage}
+        </div>
+      )}
+
+      {/* Lock screen overlay */}
       {isLocked && (
         <div className="modal-overlay" style={{ zIndex: 9999 }}>
           <div className="modal-content">
@@ -214,24 +244,13 @@ export default function Game() {
       )}
 
       <div className="hud-bar" aria-label="Captain Info">
-        <span>
-          <strong>Captain:</strong> {captain.name}
-        </span>
-        <span>
-          <strong>Base:</strong> {captain.base}
-        </span>
-        <span>
-          <strong>Aircraft:</strong> {captain.aircraft}
-        </span>
-        <span>
-          <strong>Phase:</strong> {GAME_PHASES[currentPhase]}
-        </span>
-        <span>
-          <strong>Score:</strong> {score}
-        </span>
+        <span><strong>Captain:</strong> {captain.name}</span>
+        <span><strong>Base:</strong> {captain.base}</span>
+        <span><strong>Aircraft:</strong> {captain.aircraft}</span>
+        <span><strong>Phase:</strong> {GAME_PHASES[currentPhase]}</span>
+        <span><strong>Score:</strong> {score}</span>
       </div>
 
-      {/* Score bar */}
       <div className="score-bar-container" aria-label="Score progress bar">
         <div
           className="score-bar"
