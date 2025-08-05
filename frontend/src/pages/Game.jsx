@@ -16,6 +16,7 @@ export default function Game() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [fetchError, setFetchError] = useState(null);
+  const [isLocked, setIsLocked] = useState(false);
   const timerRef = useRef(null);
 
   const [captain] = useState({
@@ -47,27 +48,75 @@ export default function Game() {
 
     fetchEvents();
 
-    const subscription = supabase
-      .channel("public:events")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "events",
-          filter: `base=eq.${captain.base},phase=eq.${GAME_PHASES[currentPhase]}`,
-        },
-        (payload) => {
-          setEventFeed((prev) => [payload.new, ...prev]);
-          if (!activeEvent) setActiveEvent(payload.new);
-        }
-      )
-      .subscribe();
+    const channel = supabase.channel(`game-${captain.base}`);
+
+    // Listen to new events
+    channel.on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "events",
+        filter: `base=eq.${captain.base},phase=eq.${GAME_PHASES[currentPhase]}`,
+      },
+      (payload) => {
+        setEventFeed((prev) => [payload.new, ...prev]);
+        if (!activeEvent) setActiveEvent(payload.new);
+      }
+    );
+
+    // Listen to phase changes
+    channel.on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "game_state",
+        filter: `base=eq.${captain.base}`,
+      },
+      (payload) => {
+        setCurrentPhase(payload.new.phase_index);
+        setEventFeed([]);
+        setActiveEvent(null);
+        setTimeLeft(EVENT_DURATION_SECONDS);
+        setIsModalOpen(false);
+        setLog((prev) => [
+          ...prev,
+          `✈ Phase updated remotely to "${GAME_PHASES[payload.new.phase_index]}"`,
+        ]);
+      }
+    );
+
+    // Listen to lock/unlock
+    channel.on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "locks",
+        filter: `base=eq.${captain.base}`,
+      },
+      (payload) => {
+        const locked = payload.new.is_locked;
+        setIsLocked(locked);
+        setIsModalOpen(false);
+        setActiveEvent(null);
+        setTimeLeft(EVENT_DURATION_SECONDS);
+        setLog((prev) => [
+          ...prev,
+          locked
+            ? "🚫 Admin locked the game. Waiting for unlock."
+            : "✅ Game unlocked by Admin. You may resume.",
+        ]);
+      }
+    );
+
+    channel.subscribe();
 
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(channel);
     };
-  }, [captain.base, currentPhase]);
+  }, [captain.base, currentPhase, activeEvent]);
 
   useEffect(() => {
     if (
@@ -155,6 +204,15 @@ export default function Game() {
 
   return (
     <div className="game-container" role="main">
+      {isLocked && (
+        <div className="modal-overlay" style={{ zIndex: 9999 }}>
+          <div className="modal-content">
+            <h2>Game Paused</h2>
+            <p>The Admin has temporarily locked this session.</p>
+          </div>
+        </div>
+      )}
+
       <div className="hud-bar" aria-label="Captain Info">
         <span>
           <strong>Captain:</strong> {captain.name}
@@ -196,7 +254,6 @@ export default function Game() {
         ))}
       </div>
 
-      {/* Modal popup for event with close and timer */}
       {isModalOpen && (
         <div
           className="modal-overlay"
@@ -237,13 +294,13 @@ export default function Game() {
         {!loadingEvents && !fetchError && eventFeed.length === 0 && (
           <p>No events yet.</p>
         )}
-        {!loadingEvents && !fetchError && eventFeed.length > 0 && (
+        {!loadingEvents && !fetchError && eventFeed.length > 0 &&
           eventFeed.map((event) => (
             <div key={event.id} className="event-msg">
               {event.message}
             </div>
           ))
-        )}
+        }
       </div>
 
       <div className="tools-panel">
@@ -261,14 +318,19 @@ export default function Game() {
       <div className="advance-phase">
         <button
           onClick={handlePhaseAdvance}
-          disabled={isModalOpen || activeEvent !== null}
+          disabled={isModalOpen || activeEvent !== null || isLocked}
           style={{
-            opacity: isModalOpen || activeEvent !== null ? 0.6 : 1,
-            cursor: isModalOpen || activeEvent !== null ? "not-allowed" : "pointer",
+            opacity: isModalOpen || activeEvent !== null || isLocked ? 0.6 : 1,
+            cursor:
+              isModalOpen || activeEvent !== null || isLocked
+                ? "not-allowed"
+                : "pointer",
           }}
-          aria-disabled={isModalOpen || activeEvent !== null}
+          aria-disabled={isModalOpen || activeEvent !== null || isLocked}
           title={
-            isModalOpen || activeEvent !== null
+            isLocked
+              ? "Game is locked by Admin"
+              : isModalOpen || activeEvent !== null
               ? "Please respond to or dismiss the current event before proceeding."
               : undefined
           }
