@@ -298,3 +298,8 @@ html, body, #root {
 .modal-choice-btn:hover {
   background-color: #e65c00;
 }
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
