@@ -16,54 +16,99 @@ const Admin = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
 
+  // Fetch current phase and lock from DB
   useEffect(() => {
-    // TODO: replace with real DB call
-    setPlayers([
-      { id: 1, name: "Alessandro", surname: "Oliveto", base: "LTN", points: 45 },
-      { id: 2, name: "Marco", surname: "Rossi", base: "LTN", points: 38 },
-      { id: 3, name: "Sara", surname: "Bianchi", base: "LTN", points: 33 },
-    ]);
+    const fetchState = async () => {
+      const { data: phaseData } = await supabase
+        .from("game_state")
+        .select("phase_index")
+        .eq("base", base)
+        .single();
+
+      if (phaseData) setCurrentPhaseIndex(phaseData.phase_index);
+
+      const { data: lockData } = await supabase
+        .from("locks")
+        .select("is_locked")
+        .eq("base", base)
+        .single();
+
+      if (lockData) setIsLocked(lockData.is_locked);
+    };
+
+    fetchState();
   }, [base]);
 
+  // Fetch live leaderboard (optional)
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      const { data } = await supabase
+        .from("scores")
+        .select("*")
+        .eq("base", base)
+        .order("score", { ascending: false });
+
+      if (data) setPlayers(data);
+    };
+
+    fetchLeaderboard();
+  }, [base]);
+
+  // Lock/unlock players
+  const toggleLock = async () => {
+    const newStatus = !isLocked;
+    setIsLocked(newStatus);
+
+    const { error } = await supabase
+      .from("locks")
+      .upsert({ base, is_locked: newStatus }, { onConflict: ["base"] });
+
+    if (error) console.error("Failed to update lock:", error.message);
+  };
+
+  // Phase change logic
+  const updatePhase = async (newIndex) => {
+    setCurrentPhaseIndex(newIndex);
+
+    const { error } = await supabase
+      .from("game_state")
+      .upsert({ base, phase_index: newIndex }, { onConflict: ["base"] });
+
+    if (error) console.error("Failed to update phase:", error.message);
+  };
+
   const handlePrevPhase = () => {
-    if (currentPhaseIndex > 0) setCurrentPhaseIndex((i) => i - 1);
+    if (currentPhaseIndex > 0) updatePhase(currentPhaseIndex - 1);
   };
 
   const handleNextPhase = () => {
-    if (currentPhaseIndex < GAME_PHASES.length - 1) setCurrentPhaseIndex((i) => i + 1);
+    if (currentPhaseIndex < GAME_PHASES.length - 1) updatePhase(currentPhaseIndex + 1);
   };
 
-  const toggleLock = () => {
-    setIsLocked(!isLocked);
-  };
-
+  // Add event to Supabase
   const handleNewEventSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const parsedChoices = JSON.parse(newEvent.choices);
+    try {
+      const parsedChoices = JSON.parse(newEvent.choices);
 
-    const { error } = await supabase.from("events").insert({
-      message: newEvent.message,
-      choices: parsedChoices,
-      phase: newEvent.phase,
-      base: base,
-      timestamp: new Date().toISOString(),
-    });
+      const { error } = await supabase.from("events").insert({
+        message: newEvent.message,
+        choices: parsedChoices,
+        phase: newEvent.phase,
+        base,
+        timestamp: new Date().toISOString(),
+      });
 
-    if (error) {
-      console.error("Failed to insert event:", error.message);
-      alert("❌ Failed to add event. Check console for details.");
-    } else {
-      alert("✅ Event added successfully.");
+      if (error) throw error;
+
+      alert("✅ Event added successfully!");
       setNewEvent({ message: "", choices: "", phase: GAME_PHASES[0] });
+    } catch (err) {
+      console.error("Invalid JSON format or insert failed:", err.message);
+      alert("❌ Failed to add event. Check JSON formatting.");
     }
-  } catch (err) {
-    console.error("Invalid JSON format for choices:", err.message);
-    alert("❌ Invalid JSON format in choices.");
-  }
-};
-
+  };
 
   return (
     <div className="game-container">
@@ -71,7 +116,10 @@ const Admin = () => {
         <span><strong>Admin Dashboard</strong></span>
         <span>Base: {base}</span>
         <span>Current Phase: {GAME_PHASES[currentPhaseIndex]}</span>
-        <button onClick={toggleLock} style={{ marginLeft: "auto", cursor: "pointer" }}>
+        <button
+          onClick={toggleLock}
+          style={{ marginLeft: "auto", cursor: "pointer" }}
+        >
           {isLocked ? "Unlock Players" : "Lock Players"}
         </button>
       </div>
@@ -96,7 +144,7 @@ const Admin = () => {
                     <td>{p.name}</td>
                     <td>{p.surname}</td>
                     <td>{p.base}</td>
-                    <td>{p.points}</td>
+                    <td>{p.score}</td>
                   </tr>
                 ))}
               </tbody>
@@ -107,7 +155,7 @@ const Admin = () => {
         {/* Right side - Event Management */}
         <div style={{ flex: 1 }}>
           <div className="tools-panel">
-            <h3>Add New Event (Mock)</h3>
+            <h3>Add New Event</h3>
             <form onSubmit={handleNewEventSubmit}>
               <div style={{ marginBottom: "1rem" }}>
                 <label>
@@ -130,7 +178,7 @@ const Admin = () => {
                     onChange={(e) => setNewEvent({ ...newEvent, choices: e.target.value })}
                     rows={4}
                     style={{ width: "100%" }}
-                    placeholder='Example: [{"text":"Accept","score":5},{"text":"Reject","score":-5}]'
+                    placeholder='[{"text":"Yes","score":5},{"text":"No","score":-5}]'
                     required
                   />
                 </label>
@@ -152,13 +200,15 @@ const Admin = () => {
               </div>
 
               <button type="submit" className="advance-phase" style={{ maxWidth: "150px" }}>
-                Add Event (Mock)
+                Add Event
               </button>
             </form>
           </div>
 
           {/* Phase Controls */}
-          <div className="advance-phase" style={{ display: "flex", justifyContent: "center", gap: "1rem", marginTop: "2rem" }}>
+          <div className="advance-phase" style={{
+            display: "flex", justifyContent: "center", gap: "1rem", marginTop: "2rem"
+          }}>
             <button onClick={handlePrevPhase} disabled={currentPhaseIndex === 0}>
               Previous Phase
             </button>
