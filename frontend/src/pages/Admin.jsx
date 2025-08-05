@@ -16,39 +16,48 @@ const Admin = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
 
-  // Fetch current phase and lock from DB
+  // ✅ Fetch current phase and lock from DB — no more 406
   useEffect(() => {
     const fetchState = async () => {
-      const { data: phaseData } = await supabase
+      const { data: phaseData, error: phaseError } = await supabase
         .from("game_state")
         .select("phase_index")
         .eq("base", base)
         .single();
 
-      if (phaseData) setCurrentPhaseIndex(phaseData.phase_index);
+      if (phaseError) {
+        console.error("Phase fetch error:", phaseError.message);
+      } else {
+        setCurrentPhaseIndex(phaseData.phase_index);
+      }
 
-      const { data: lockData } = await supabase
+      const { data: lockData, error: lockError } = await supabase
         .from("locks")
         .select("is_locked")
         .eq("base", base)
         .single();
 
-      if (lockData) setIsLocked(lockData.is_locked);
+      if (lockError) {
+        console.error("Lock fetch error:", lockError.message);
+      } else {
+        setIsLocked(lockData.is_locked);
+      }
     };
 
     fetchState();
   }, [base]);
 
-  // Fetch leaderboard
+  // Leaderboard
   useEffect(() => {
     const fetchLeaderboard = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("scores")
         .select("*")
         .eq("base", base)
         .order("score", { ascending: false });
 
-      if (data) setPlayers(data);
+      if (!error) setPlayers(data);
+      else console.error("Leaderboard fetch error:", error.message);
     };
 
     fetchLeaderboard();
@@ -66,7 +75,7 @@ const Admin = () => {
     if (error) console.error("Failed to update lock:", error.message);
   };
 
-  // Phase change logic (forces UPDATE to trigger Game.jsx)
+  // Phase control
   const updatePhase = async (newIndex) => {
     setCurrentPhaseIndex(newIndex);
 
@@ -83,10 +92,11 @@ const Admin = () => {
   };
 
   const handleNextPhase = () => {
-    if (currentPhaseIndex < GAME_PHASES.length - 1) updatePhase(currentPhaseIndex + 1);
+    if (currentPhaseIndex < GAME_PHASES.length - 1)
+      updatePhase(currentPhaseIndex + 1);
   };
 
-  // Add event to Supabase
+  // Add event
   const handleNewEventSubmit = async (e) => {
     e.preventDefault();
 
@@ -163,7 +173,9 @@ const Admin = () => {
                   Message:<br />
                   <textarea
                     value={newEvent.message}
-                    onChange={(e) => setNewEvent({ ...newEvent, message: e.target.value })}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, message: e.target.value })
+                    }
                     rows={3}
                     style={{ width: "100%" }}
                     required
@@ -174,7 +186,10 @@ const Admin = () => {
               <div style={{ marginBottom: "1rem" }}>
                 <label><strong>Choices:</strong></label>
                 {newEvent.choicesArray?.map((choice, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                  <div
+                    key={idx}
+                    style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}
+                  >
                     <input
                       type="text"
                       placeholder="Choice text"
@@ -202,7 +217,9 @@ const Admin = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        const updated = newEvent.choicesArray.filter((_, i) => i !== idx);
+                        const updated = newEvent.choicesArray.filter(
+                          (_, i) => i !== idx
+                        );
                         setNewEvent({ ...newEvent, choicesArray: updated });
                       }}
                     >
@@ -215,7 +232,10 @@ const Admin = () => {
                   onClick={() =>
                     setNewEvent({
                       ...newEvent,
-                      choicesArray: [...(newEvent.choicesArray || []), { text: "", score: 0 }],
+                      choicesArray: [
+                        ...(newEvent.choicesArray || []),
+                        { text: "", score: 0 },
+                      ],
                     })
                   }
                 >
@@ -228,30 +248,46 @@ const Admin = () => {
                   Phase:<br />
                   <select
                     value={newEvent.phase}
-                    onChange={(e) => setNewEvent({ ...newEvent, phase: e.target.value })}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, phase: e.target.value })
+                    }
                     style={{ width: "100%" }}
                   >
                     {GAME_PHASES.map((phase, idx) => (
-                      <option key={idx} value={phase}>{phase}</option>
+                      <option key={idx} value={phase}>
+                        {phase}
+                      </option>
                     ))}
                   </select>
                 </label>
               </div>
 
-              <button type="submit" className="advance-phase" style={{ maxWidth: "150px" }}>
+              <button
+                type="submit"
+                className="advance-phase"
+                style={{ maxWidth: "150px" }}
+              >
                 Add Event
               </button>
             </form>
           </div>
 
-          {/* Phase Controls */}
-          <div className="advance-phase" style={{
-            display: "flex", justifyContent: "center", gap: "1rem", marginTop: "2rem"
-          }}>
+          <div
+            className="advance-phase"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "1rem",
+              marginTop: "2rem",
+            }}
+          >
             <button onClick={handlePrevPhase} disabled={currentPhaseIndex === 0}>
               Previous Phase
             </button>
-            <button onClick={handleNextPhase} disabled={currentPhaseIndex === GAME_PHASES.length - 1}>
+            <button
+              onClick={handleNextPhase}
+              disabled={currentPhaseIndex === GAME_PHASES.length - 1}
+            >
               Next Phase
             </button>
           </div>
