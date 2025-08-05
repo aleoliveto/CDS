@@ -10,8 +10,8 @@ const Admin = () => {
   const [players, setPlayers] = useState([]);
   const [newEvent, setNewEvent] = useState({
     message: "",
-    choices: "",
     phase: GAME_PHASES[0],
+    choicesArray: [],
   });
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
@@ -39,7 +39,7 @@ const Admin = () => {
     fetchState();
   }, [base]);
 
-  // Fetch live leaderboard (optional)
+  // Fetch leaderboard
   useEffect(() => {
     const fetchLeaderboard = async () => {
       const { data } = await supabase
@@ -66,13 +66,14 @@ const Admin = () => {
     if (error) console.error("Failed to update lock:", error.message);
   };
 
-  // Phase change logic
+  // Phase change logic (forces UPDATE to trigger Game.jsx)
   const updatePhase = async (newIndex) => {
     setCurrentPhaseIndex(newIndex);
 
     const { error } = await supabase
       .from("game_state")
-      .upsert({ base, phase_index: newIndex }, { onConflict: ["base"] });
+      .update({ phase_index: newIndex })
+      .eq("base", base);
 
     if (error) console.error("Failed to update phase:", error.message);
   };
@@ -90,12 +91,12 @@ const Admin = () => {
     e.preventDefault();
 
     try {
-      const parsedChoices = JSON.parse(newEvent.choices);
+      const { message, choicesArray, phase } = newEvent;
 
       const { error } = await supabase.from("events").insert({
-        message: newEvent.message,
-        choices: parsedChoices,
-        phase: newEvent.phase,
+        message,
+        choices: choicesArray,
+        phase,
         base,
         timestamp: new Date().toISOString(),
       });
@@ -103,10 +104,10 @@ const Admin = () => {
       if (error) throw error;
 
       alert("✅ Event added successfully!");
-      setNewEvent({ message: "", choices: "", phase: GAME_PHASES[0] });
+      setNewEvent({ message: "", phase: GAME_PHASES[0], choicesArray: [] });
     } catch (err) {
-      console.error("Invalid JSON format or insert failed:", err.message);
-      alert("❌ Failed to add event. Check JSON formatting.");
+      console.error("Insert failed:", err.message);
+      alert("❌ Failed to add event. Check inputs.");
     }
   };
 
@@ -125,7 +126,7 @@ const Admin = () => {
       </div>
 
       <div style={{ display: "flex", gap: "2rem", width: "100%", maxWidth: "1000px" }}>
-        {/* Left side - Leaderboard */}
+        {/* Left - Leaderboard */}
         <div style={{ flex: 1, maxHeight: "400px", overflowY: "auto" }}>
           <div className="event-feed">
             <h3>Leaderboard</h3>
@@ -152,7 +153,7 @@ const Admin = () => {
           </div>
         </div>
 
-        {/* Right side - Event Management */}
+        {/* Right - Event Management */}
         <div style={{ flex: 1 }}>
           <div className="tools-panel">
             <h3>Add New Event</h3>
@@ -171,17 +172,55 @@ const Admin = () => {
               </div>
 
               <div style={{ marginBottom: "1rem" }}>
-                <label>
-                  Choices (JSON format):<br />
-                  <textarea
-                    value={newEvent.choices}
-                    onChange={(e) => setNewEvent({ ...newEvent, choices: e.target.value })}
-                    rows={4}
-                    style={{ width: "100%" }}
-                    placeholder='[{"text":"Yes","score":5},{"text":"No","score":-5}]'
-                    required
-                  />
-                </label>
+                <label><strong>Choices:</strong></label>
+                {newEvent.choicesArray?.map((choice, idx) => (
+                  <div key={idx} style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                    <input
+                      type="text"
+                      placeholder="Choice text"
+                      value={choice.text}
+                      onChange={(e) => {
+                        const updated = [...newEvent.choicesArray];
+                        updated[idx].text = e.target.value;
+                        setNewEvent({ ...newEvent, choicesArray: updated });
+                      }}
+                      style={{ flex: 2 }}
+                      required
+                    />
+                    <input
+                      type="number"
+                      placeholder="Score"
+                      value={choice.score}
+                      onChange={(e) => {
+                        const updated = [...newEvent.choicesArray];
+                        updated[idx].score = parseInt(e.target.value);
+                        setNewEvent({ ...newEvent, choicesArray: updated });
+                      }}
+                      style={{ width: "70px" }}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = newEvent.choicesArray.filter((_, i) => i !== idx);
+                        setNewEvent({ ...newEvent, choicesArray: updated });
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setNewEvent({
+                      ...newEvent,
+                      choicesArray: [...(newEvent.choicesArray || []), { text: "", score: 0 }],
+                    })
+                  }
+                >
+                  + Add Choice
+                </button>
               </div>
 
               <div style={{ marginBottom: "1rem" }}>
