@@ -37,11 +37,33 @@ const Admin = () => {
     setIsLocked(!isLocked);
   };
 
-  const handleNewEventSubmit = (e) => {
-    e.preventDefault();
-    alert(`Event to add:\nMessage: ${newEvent.message}\nChoices: ${newEvent.choices}\nPhase: ${newEvent.phase}`);
-    setNewEvent({ message: "", choices: "", phase: GAME_PHASES[0] });
-  };
+  const handleNewEventSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const parsedChoices = JSON.parse(newEvent.choices);
+
+    const { error } = await supabase.from("events").insert({
+      message: newEvent.message,
+      choices: parsedChoices,
+      phase: newEvent.phase,
+      base: base,
+      timestamp: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.error("Failed to insert event:", error.message);
+      alert("❌ Failed to add event. Check console for details.");
+    } else {
+      alert("✅ Event added successfully.");
+      setNewEvent({ message: "", choices: "", phase: GAME_PHASES[0] });
+    }
+  } catch (err) {
+    console.error("Invalid JSON format for choices:", err.message);
+    alert("❌ Invalid JSON format in choices.");
+  }
+};
+
 
   return (
     <div className="game-container">
