@@ -1,86 +1,101 @@
 /* SpiritPage.css */
-.spirit-wrapper {
+
+.spirit-container {
   font-family: 'Segoe UI', sans-serif;
-  border: 10px solid #ff6600;
-  background: #fff;
-  overflow: auto;
   max-width: 1300px;
   margin: 0 auto;
+  border: 10px solid #ff6600;
+  background: #fff;
+  overflow-x: hidden;
 }
 
-.spirit-top {
+.spirit-header {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
   padding: 2rem;
+  position: relative;
+  gap: 2rem;
   flex-wrap: wrap;
 }
 
-.triangle-left {
+.triangle {
   width: 0;
   height: 0;
   border-top: 300px solid transparent;
   border-bottom: 300px solid transparent;
   border-right: 300px solid #ff6600;
-}
-
-.spirit-purpose {
-  position: relative;
-  width: 300px;
-  min-width: 280px;
-  flex-shrink: 0;
-}
-
-.purpose-text {
   position: absolute;
-  top: 120px;
-  left: 25px;
-  color: #fff;
+  left: 0;
+  top: 0;
+}
+
+.purpose {
+  width: 300px;
+  min-width: 250px;
+  padding-left: 2rem;
+  z-index: 2;
+  color: white;
   font-weight: bold;
+  text-align: left;
+  margin-top: 6rem;
+}
+
+.purpose h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.purpose p {
   font-size: 1.3rem;
   line-height: 1.4;
 }
 
-.spirit-priorities {
+.priorities {
   flex: 1;
-  padding: 0 1rem;
+  padding-left: 1rem;
 }
 
-.orange-title {
+.section-title {
   color: #ff6600;
   font-weight: bold;
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
-.priority-row {
+.priority-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.priority-item {
   display: flex;
   align-items: center;
-  margin-bottom: 2rem;
   position: relative;
 }
 
 .dot {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border: 2px solid #ff6600;
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
 .dotted-line {
   flex-grow: 1;
-  height: 2px;
   border-top: 2px dotted #ff6600;
-  margin-right: 10px;
+  margin: 0 10px;
 }
 
-.plane-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+.plane {
+  width: 40px;
+  height: 40px;
   border: 3px solid #ff6600;
+  border-radius: 50%;
   background: #fff;
   display: flex;
   align-items: center;
@@ -88,125 +103,138 @@
   margin-right: 10px;
 }
 
-.plane-icon img {
+.plane img {
   width: 20px;
   height: 20px;
 }
 
 .priority-text {
-  font-weight: bold;
   font-size: 1rem;
+  font-weight: bold;
   color: #1d1d1d;
+  white-space: nowrap;
 }
 
-.spirit-destination {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.destination {
+  width: 280px;
   flex-shrink: 0;
-  width: 260px;
-  margin-top: 2rem;
+  text-align: center;
 }
 
 .destination-circle {
-  width: 220px;
-  height: 220px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   background-color: #ff6600;
   color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 1rem;
   margin-top: 1rem;
+  line-height: 1.4;
 }
 
 .spirit-footer {
-  margin-top: 2rem;
+  background: #f2f2f2;
   padding: 2rem;
-  background-color: #f2f2f2;
+  margin-top: 2rem;
 }
 
-.footer-row {
+.footer-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  text-align: center;
+  color: #555;
   font-size: 0.95rem;
-  color: #666;
   flex-wrap: wrap;
 }
 
-.spirit-living-box {
-  text-align: center;
-  margin: 1rem auto 2rem;
-  padding: 0.75rem 1rem;
-  border: 2px solid #ff6600;
-  width: fit-content;
+.footer-header h2 {
+  color: #ff6600;
+  font-size: 1.8rem;
   font-weight: bold;
-  font-size: 1rem;
 }
 
-.spirit-values {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+.orange-spirit-box {
   text-align: center;
+  border: 2px solid #ff6600;
+  padding: 0.6rem 1.5rem;
+  margin: 1rem auto 2rem;
+  font-weight: bold;
+  color: #999;
+  width: fit-content;
 }
 
-.value-box {
+.footer-values {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.value {
   flex: 1 1 22%;
   min-width: 200px;
   border: 2px solid #ff6600;
   padding: 1rem;
-  background: #fff;
+  text-align: center;
+  background: white;
 }
 
-.value-box h3 {
+.value h3 {
   color: #ff6600;
-  margin-bottom: 0.5rem;
   font-size: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-.value-desc {
+.value p {
   font-size: 0.9rem;
   color: #333;
 }
 
-/* Responsive tweak */
+/* Responsiveness */
 @media (max-width: 768px) {
-  .spirit-top {
+  .spirit-header {
     flex-direction: column;
     align-items: center;
   }
 
-  .triangle-left {
+  .triangle {
     display: none;
   }
 
-  .spirit-purpose {
-    width: 100%;
-    text-align: center;
-    padding: 1rem;
-  }
-
-  .purpose-text {
+  .purpose {
     position: static;
     color: #ff6600;
-  }
-
-  .spirit-destination {
-    margin-top: 1rem;
-  }
-
-  .footer-row {
-    flex-direction: column;
+    margin-top: 0;
+    padding: 0;
     text-align: center;
+  }
+
+  .priority-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .priority-text {
+    margin-top: 0.5rem;
+  }
+
+  .footer-header {
+    flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .footer-values {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .value {
+    width: 100%;
   }
 }
