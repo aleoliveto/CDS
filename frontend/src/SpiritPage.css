@@ -1,85 +1,212 @@
-.spirit-page {
-  max-width: 900px;
-  margin: 2rem auto;
-  font-family: 'Segoe UI', Tahoma, sans-serif;
-  color: #333;
+/* SpiritPage.css */
+.spirit-wrapper {
+  font-family: 'Segoe UI', sans-serif;
+  border: 10px solid #ff6600;
+  background: #fff;
+  overflow: auto;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.spirit-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem;
+  flex-wrap: wrap;
+}
+
+.triangle-left {
+  width: 0;
+  height: 0;
+  border-top: 300px solid transparent;
+  border-bottom: 300px solid transparent;
+  border-right: 300px solid #ff6600;
+}
+
+.spirit-purpose {
+  position: relative;
+  width: 300px;
+  min-width: 280px;
+  flex-shrink: 0;
+}
+
+.purpose-text {
+  position: absolute;
+  top: 120px;
+  left: 25px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.3rem;
+  line-height: 1.4;
+}
+
+.spirit-priorities {
+  flex: 1;
+  padding: 0 1rem;
+}
+
+.orange-title {
+  color: #ff6600;
+  font-weight: bold;
+  font-size: 2rem;
+  margin-bottom: 1rem;
   text-align: center;
 }
 
-.page-title {
-  margin-bottom: 1rem;
-}
-
-.image-container {
+.priority-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
   position: relative;
-  width: 100%;
-  max-width: 850px;
-  margin: 0 auto 2rem;
 }
 
-.spirit-image {
-  width: 100%;
-  height: auto;
-  display: block;
+.dot {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ff6600;
+  border-radius: 50%;
+  margin-right: 10px;
 }
 
-/* Position dropdowns where the orange boxes are on your image */
-/* These top/left values will need to be adjusted exactly */
+.dotted-line {
+  flex-grow: 1;
+  height: 2px;
+  border-top: 2px dotted #ff6600;
+  margin-right: 10px;
+}
 
-.dropdown {
-  position: absolute;
-  padding: 0.3rem 0.5rem;
-  font-size: 0.9rem;
-  border-radius: 5px;
-  border: 1px solid #ff6600;
-  background: rgba(255, 255, 255, 0.9);
-  color: #000;
+.plane-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid #ff6600;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.plane-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.priority-text {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #1d1d1d;
+}
+
+.spirit-destination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 260px;
+  margin-top: 2rem;
+}
+
+.destination-circle {
   width: 220px;
-}
-
-/* Adjust these based on your image layout */
-
-.beOrange {
-  top: 125px;  /* adjust this */
-  left: 280px; /* adjust this */
-}
-
-.beSafe {
-  top: 190px;
-  left: 45px;
-  width: 180px;
-}
-
-.beChallenging {
-  top: 190px;
-  left: 330px;
-  width: 180px;
-}
-
-.beBold {
-  top: 190px;
-  left: 580px;
-  width: 180px;
-}
-
-.beWelcoming {
-  top: 190px;
-  left: 825px;
-  width: 180px;
-}
-
-.submit-btn {
+  height: 220px;
+  border-radius: 50%;
   background-color: #ff6600;
   color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   font-weight: bold;
-  transition: background-color 0.3s;
+  font-size: 1rem;
+  padding: 1rem;
+  margin-top: 1rem;
 }
 
-.submit-btn:hover {
-  background-color: #e65c00;
+.spirit-footer {
+  margin-top: 2rem;
+  padding: 2rem;
+  background-color: #f2f2f2;
+}
+
+.footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.spirit-living-box {
+  text-align: center;
+  margin: 1rem auto 2rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #ff6600;
+  width: fit-content;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.spirit-values {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  text-align: center;
+}
+
+.value-box {
+  flex: 1 1 22%;
+  min-width: 200px;
+  border: 2px solid #ff6600;
+  padding: 1rem;
+  background: #fff;
+}
+
+.value-box h3 {
+  color: #ff6600;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.value-desc {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Responsive tweak */
+@media (max-width: 768px) {
+  .spirit-top {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .triangle-left {
+    display: none;
+  }
+
+  .spirit-purpose {
+    width: 100%;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .purpose-text {
+    position: static;
+    color: #ff6600;
+  }
+
+  .spirit-destination {
+    margin-top: 1rem;
+  }
+
+  .footer-row {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
 }
