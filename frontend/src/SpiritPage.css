@@ -6,17 +6,16 @@
   margin: 0 auto;
   border: 10px solid #ff6600;
   background: #fff;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
+/* === HEADER SECTION === */
 .spirit-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 2rem;
+  display: grid;
+  grid-template-columns: 300px 1fr 280px;
+  align-items: center;
+  padding: 2rem 2rem 0 2rem;
   position: relative;
-  gap: 2rem;
-  flex-wrap: wrap;
 }
 
 .triangle {
@@ -28,46 +27,45 @@
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 1;
 }
 
 .purpose {
-  width: 300px;
-  min-width: 250px;
-  padding-left: 2rem;
+  position: relative;
   z-index: 2;
   color: white;
   font-weight: bold;
-  text-align: left;
-  margin-top: 6rem;
+  padding-left: 2rem;
+  padding-top: 4rem;
 }
 
 .purpose h2 {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
 .purpose p {
-  font-size: 1.3rem;
-  line-height: 1.4;
+  font-size: 1.2rem;
+  line-height: 1.5;
 }
 
+/* === PRIORITIES === */
 .priorities {
-  flex: 1;
-  padding-left: 1rem;
+  padding-left: 2rem;
 }
 
 .section-title {
   color: #ff6600;
-  font-weight: bold;
   font-size: 1.8rem;
-  margin-bottom: 1.5rem;
+  font-weight: bold;
   text-align: center;
+  margin-bottom: 1rem;
 }
 
 .priority-list {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.4rem;
 }
 
 .priority-item {
@@ -77,12 +75,12 @@
 }
 
 .dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border: 2px solid #ff6600;
   border-radius: 50%;
-  margin-right: 8px;
   flex-shrink: 0;
+  margin-right: 8px;
 }
 
 .dotted-line {
@@ -92,8 +90,8 @@
 }
 
 .plane {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 3px solid #ff6600;
   border-radius: 50%;
   background: #fff;
@@ -101,6 +99,7 @@
   align-items: center;
   justify-content: center;
   margin-right: 10px;
+  flex-shrink: 0;
 }
 
 .plane img {
@@ -109,47 +108,48 @@
 }
 
 .priority-text {
-  font-size: 1rem;
   font-weight: bold;
-  color: #1d1d1d;
+  font-size: 1rem;
   white-space: nowrap;
+  color: #333;
 }
 
+/* === DESTINATION === */
 .destination {
-  width: 280px;
-  flex-shrink: 0;
   text-align: center;
+  padding-left: 1rem;
 }
 
 .destination-circle {
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  background-color: #ff6600;
+  background: #ff6600;
   color: white;
   font-weight: bold;
   font-size: 0.95rem;
+  line-height: 1.5;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 1.2rem;
   padding: 1rem;
-  margin-top: 1rem;
-  line-height: 1.4;
 }
 
+/* === FOOTER === */
 .spirit-footer {
   background: #f2f2f2;
   padding: 2rem;
-  margin-top: 2rem;
+  position: relative;
 }
 
 .footer-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  text-align: center;
   color: #555;
   font-size: 0.95rem;
+  text-align: center;
   flex-wrap: wrap;
 }
 
@@ -157,32 +157,34 @@
   color: #ff6600;
   font-size: 1.8rem;
   font-weight: bold;
+  margin: 0;
 }
 
 .orange-spirit-box {
   text-align: center;
   border: 2px solid #ff6600;
-  padding: 0.6rem 1.5rem;
+  padding: 0.5rem 1rem;
   margin: 1rem auto 2rem;
   font-weight: bold;
   color: #999;
   width: fit-content;
+  font-size: 0.95rem;
 }
 
 .footer-values {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+  text-align: center;
 }
 
 .value {
-  flex: 1 1 22%;
-  min-width: 200px;
   border: 2px solid #ff6600;
-  padding: 1rem;
-  text-align: center;
   background: white;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .value h3 {
@@ -196,11 +198,10 @@
   color: #333;
 }
 
-/* Responsiveness */
-@media (max-width: 768px) {
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
   .spirit-header {
-    flex-direction: column;
-    align-items: center;
+    grid-template-columns: 1fr;
   }
 
   .triangle {
@@ -208,20 +209,19 @@
   }
 
   .purpose {
-    position: static;
     color: #ff6600;
-    margin-top: 0;
-    padding: 0;
+    background: none;
     text-align: center;
+    padding: 1rem 0;
   }
 
-  .priority-item {
-    flex-direction: column;
-    align-items: flex-start;
+  .priorities {
+    padding: 0;
   }
 
-  .priority-text {
-    margin-top: 0.5rem;
+  .destination {
+    padding: 0;
+    margin-top: 2rem;
   }
 
   .footer-header {
@@ -230,11 +230,6 @@
   }
 
   .footer-values {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .value {
-    width: 100%;
+    grid-template-columns: 1fr;
   }
 }
