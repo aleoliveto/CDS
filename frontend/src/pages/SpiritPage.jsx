@@ -1,6 +1,6 @@
 // SpiritPage.jsx
 import React from 'react';
-import './SpiritPage.css';
+import '../SpiritPage.css';
 
 const SpiritPage = () => {
   const priorities = [
