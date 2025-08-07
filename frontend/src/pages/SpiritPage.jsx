@@ -18,57 +18,50 @@ const SpiritPage = () => {
   ];
 
   return (
-    <div className="spirit-wrapper">
-      <div className="spirit-top">
-        <div className="spirit-purpose">
-          <div className="triangle-left" />
-          <div className="purpose-text">
-            <h2>PURPOSE</h2>
-            <p>Making low-cost<br />travel easy</p>
+    <div className="spirit-container">
+      <div className="spirit-header">
+        <div className="triangle" />
+        <div className="purpose">
+          <h2>PURPOSE</h2>
+          <p>Making low-cost<br />travel easy</p>
+        </div>
+
+        <div className="priorities">
+          <h2 className="section-title">PRIORITIES</h2>
+          <div className="priority-list">
+            {priorities.map((text, index) => (
+              <div className="priority-item" key={index}>
+                <div className="dot" />
+                <div className="dotted-line" />
+                <div className="plane">
+                  <img src="https://img.icons8.com/ios-filled/50/ff6600/airplane-take-off.png" alt="Plane icon" />
+                </div>
+                <div className="priority-text">{text}</div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="spirit-priorities">
-          <h2 className="orange-title">PRIORITIES</h2>
-          {priorities.map((p, i) => (
-            <div className="priority-row" key={i}>
-              <div className="dot" />
-              <div className="dotted-line" />
-              <div className="plane-icon">
-                <img
-                  src="https://img.icons8.com/ios-filled/50/ff6600/airplane-take-off.png"
-                  alt="Plane"
-                />
-              </div>
-              <div className="priority-text">{p}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="spirit-destination">
-          <h2 className="orange-title">DESTINATION</h2>
+        <div className="destination">
+          <h2 className="section-title">DESTINATION</h2>
           <div className="destination-circle">
-            Europe’s most loved airline —<br />
-            winning for our customers,<br />
-            shareholders and people.
+            Europe’s most loved airline —<br />winning for our customers,<br />shareholders and people.
           </div>
         </div>
       </div>
 
       <div className="spirit-footer">
-        <div className="footer-row">
+        <div className="footer-header">
           <span>Made possible by our people</span>
-          <h2 className="orange-title">BE ORANGE</h2>
+          <h2>BE ORANGE</h2>
           <span>Being true to our promises</span>
         </div>
-        <div className="spirit-living-box">
-          Living the Orange Spirit
-        </div>
-        <div className="spirit-values">
-          {values.map((val, i) => (
-            <div className="value-box" key={i}>
-              <h3>{val.label}</h3>
-              <div className="value-desc">{val.desc}</div>
+        <div className="orange-spirit-box">Living the Orange Spirit</div>
+        <div className="footer-values">
+          {values.map((item, index) => (
+            <div className="value" key={index}>
+              <h3>{item.label}</h3>
+              <p>{item.desc}</p>
             </div>
           ))}
         </div>
