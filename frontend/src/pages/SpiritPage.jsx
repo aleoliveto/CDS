@@ -17,7 +17,7 @@ export default function SpiritPage() {
     { label: "BE WELCOMING", desc: "Always warm and welcoming" },
   ];
 
-  // ===== QUIZ DATA (options) =====
+  // ===== QUIZ OPTIONS =====
   const priorityOptions = [
     "Building Europe’s best network",
     "Transforming revenue",
@@ -47,61 +47,43 @@ export default function SpiritPage() {
   ];
 
   // ===== QUIZ STATE =====
-  const [quizStarted, setQuizStarted] = useState(false); // lock-in
+  const [quizStarted, setQuizStarted] = useState(false);
   const [answers, setAnswers] = useState({
-    priorities: ["", "", "", ""], // 4
-    pill: "",                      // 1
-    values: ["", "", "", ""],      // 4 (descriptions)
+    priorities: ["", "", "", ""],
+    pill: "",
+    values: ["", "", "", ""],
   });
   const [checked, setChecked] = useState(false);
 
-  const totalQuestions = 4 + 1 + 4;
+  const totalQuestions = 9; // 4 priorities + 1 pill + 4 values
 
   const score = useMemo(() => {
     if (!checked) return null;
     let s = 0;
-    // priorities
-    priorities.forEach((p, i) => {
-      if (answers.priorities[i] === p) s++;
-    });
-    // pill
-    if (answers.pill === pillCorrect) s++;
-    // values (descriptions must match by index)
-    values.forEach((v, i) => {
-      if (answers.values[i] === v.desc) s++;
-    });
+    priorities.forEach((p, i) => answers.priorities[i] === p && s++);
+    answers.pill === pillCorrect && s++;
+    values.forEach((v, i) => answers.values[i] === v.desc && s++);
     return s;
   }, [checked, answers, priorities, values]);
 
-  function updatePriority(i, v) {
-    const next = { ...answers, priorities: answers.priorities.slice() };
-    next.priorities[i] = v;
-    setAnswers(next);
-  }
-  function updatePill(v) {
-    setAnswers({ ...answers, pill: v });
-  }
-  function updateValueDesc(i, v) {
-    const next = { ...answers, values: answers.values.slice() };
-    next.values[i] = v;
-    setAnswers(next);
-  }
+  // helpers
+  const updatePriority = (i, v) =>
+    setAnswers((prev) => ({ ...prev, priorities: prev.priorities.map((x, idx) => (idx === i ? v : x)) }));
+  const updatePill = (v) => setAnswers((prev) => ({ ...prev, pill: v }));
+  const updateValueDesc = (i, v) =>
+    setAnswers((prev) => ({ ...prev, values: prev.values.map((x, idx) => (idx === i ? v : x)) }));
 
-  function startQuiz() {
-    setQuizStarted(true); // cannot go back
-  }
-  function onCheck() {
-    setChecked(true);
-  }
-  function onReset() {
+  const startQuiz = () => setQuizStarted(true); // one-way
+  const onCheck = () => setChecked(true);
+  const onReset = () => {
     setChecked(false);
     setAnswers({ priorities: ["", "", "", ""], pill: "", values: ["", "", "", ""] });
-  }
+  };
 
   // ===== UI =====
   return (
     <section className="spirit-container" aria-label="easyJet Orange Spirit">
-      {/* Toolbar (one-way) */}
+      {/* Toolbar */}
       <div className="spirit-toolbar">
         {!quizStarted ? (
           <button type="button" className="btn-toggle" onClick={startQuiz}>
@@ -116,16 +98,11 @@ export default function SpiritPage() {
         )}
       </div>
 
-      {/* ===== TOP (white) ===== */}
+      {/* ===== TOP ===== */}
       <div className="spirit-header">
-        {/* LEFT: PURPOSE chevron */}
+        {/* PURPOSE */}
         <div className="spirit-left">
-          <svg
-            className="chevron"
-            viewBox="0 0 320 360"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
+          <svg className="chevron" viewBox="0 0 320 360" preserveAspectRatio="none" aria-hidden="true">
             <polygon points="0,0 250,180 0,360" fill="#ff6600" />
           </svg>
 
@@ -139,7 +116,7 @@ export default function SpiritPage() {
           </div>
         </div>
 
-        {/* MIDDLE: PRIORITIES */}
+        {/* PRIORITIES */}
         <div className="spirit-priorities">
           <h2 className="section-title">PRIORITIES</h2>
 
@@ -165,12 +142,7 @@ export default function SpiritPage() {
             <ul className="priority-list">
               {priorities.map((correct, i) => {
                 const a = answers.priorities[i];
-                const state =
-                  !checked || a === ""
-                    ? "neutral"
-                    : a === correct
-                    ? "correct"
-                    : "wrong";
+                const state = !checked || a === "" ? "neutral" : a === correct ? "correct" : "wrong";
                 return (
                   <li key={correct} className={`priority-row quiz-row ${state}`}>
                     <span className="dot" aria-hidden="true" />
@@ -183,7 +155,6 @@ export default function SpiritPage() {
                         height="20"
                       />
                     </span>
-
                     <label className="sr-only" htmlFor={`priority-${i}`}>
                       Priority {i + 1}
                     </label>
@@ -207,7 +178,7 @@ export default function SpiritPage() {
           )}
         </div>
 
-        {/* RIGHT: DESTINATION */}
+        {/* DESTINATION */}
         <div className="spirit-destination">
           <h2 className="section-title">DESTINATION</h2>
           <div className="destination-circle" role="figure" aria-label="Destination statement">
@@ -220,7 +191,7 @@ export default function SpiritPage() {
         </div>
       </div>
 
-      {/* ===== FOOTER (grey) ===== */}
+      {/* ===== FOOTER ===== */}
       <div className="spirit-footer">
         <div className="footer-header">
           <span>Made possible by our people</span>
@@ -228,28 +199,37 @@ export default function SpiritPage() {
           <span>Being true to our promises</span>
         </div>
 
-        {/* Pill becomes a select in quiz mode */}
+        {/* Pill (view) or select (quiz) — still centered */}
         <div className="orange-core-wrap">
           {!quizStarted ? (
             <div className="orange-core" aria-label="Living the Orange Spirit">
               Living the Orange Spirit
             </div>
           ) : (
-            <select
-              className={`orange-core-select ${
-                !checked ? "neutral" : answers.pill === pillCorrect ? "correct" : "wrong"
+            <div
+              className={`orange-core-box ${
+                !checked || answers.pill === ""
+                  ? "neutral"
+                  : answers.pill === pillCorrect
+                  ? "correct"
+                  : "wrong"
               }`}
-              value={answers.pill}
-              onChange={(e) => updatePill(e.target.value)}
-              aria-label="Select the core statement"
             >
-              <option value="">Select the core statement…</option>
-              {pillOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
+              <h3>Be Orange</h3>
+              <select
+                className="orange-core-select"
+                value={answers.pill}
+                onChange={(e) => updatePill(e.target.value)}
+                aria-label="Select the core statement"
+              >
+                <option value="">Select the core statement…</option>
+                {pillOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
         </div>
 
@@ -257,13 +237,7 @@ export default function SpiritPage() {
           {values.map((v, i) => {
             const a = answers.values[i];
             const state =
-              !quizStarted
-                ? ""
-                : !checked || a === ""
-                ? "neutral"
-                : a === v.desc
-                ? "correct"
-                : "wrong";
+              !quizStarted ? "" : !checked || a === "" ? "neutral" : a === v.desc ? "correct" : "wrong";
             return (
               <div className={`value-box ${state}`} key={v.label}>
                 <h3>{v.label}</h3>
@@ -294,7 +268,6 @@ export default function SpiritPage() {
           })}
         </div>
 
-        {/* Quiz controls & score */}
         {quizStarted && (
           <div className="quiz-controls">
             <button type="button" className="btn-primary" onClick={onCheck}>
@@ -303,7 +276,6 @@ export default function SpiritPage() {
             <button type="button" className="btn-secondary" onClick={onReset}>
               Reset
             </button>
-
             {checked && (
               <div className="quiz-score" role="status" aria-live="polite">
                 Score: <strong>{score}</strong> / {totalQuestions}
