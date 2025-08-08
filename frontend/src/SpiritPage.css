@@ -52,7 +52,7 @@
 .purpose-text p{ margin:0; font-size:22px; }
 
 /* =========================
-   PRIORITIES (poster-true grid)
+   PRIORITIES (poster-true grid, now fluid)
    ========================= */
 .spirit-priorities{ padding:0 2px; }
 .section-title{
@@ -61,10 +61,10 @@
 }
 .priority-list{ display:grid; gap:30px; margin:0; padding:0; }
 
-/* Poster geometry: dot | dotted(260px) | plane(52px col) | answer(560px) */
+/* Fluid geometry: dot | dotted (min 160, max 260) | plane | answer (min 360, max 560) */
 .priority-row{
   display:grid !important;
-  grid-template-columns: 16px 260px 52px 560px;
+  grid-template-columns: 16px minmax(160px,260px) 52px minmax(360px,560px);
   align-items:center;
   column-gap:12px;
   position:relative;
@@ -74,7 +74,7 @@
   border:2px solid var(--orange); flex:0 0 auto;
 }
 
-/* 260px dotted rail, stops before the plane */
+/* dotted rail fills its column; ends before plane */
 .dotted-line{
   height:2px; position:relative; margin-left:6px; width:100%;
 }
@@ -86,24 +86,22 @@
   );
 }
 
-/* plane badge (52px column gives 44 size + borders + breathing room) */
+/* plane badge */
 .plane-icon{
   width:44px; height:44px; border-radius:50%;
   border:3px solid var(--orange); background:#fff;
   display:flex; align-items:center; justify-content:center;
   box-shadow:0 0 0 3px #fff;
-  margin-left:0; /* grid handles spacing */
+  margin-left:0;
 }
 .plane-icon img{ width:20px; height:20px; display:block; }
 
-/* view-mode label lives in the 560px column */
+/* label/select share same column */
 .priority-label{
   display:block;
   font-weight:900; font-size:20px; color:#333 !important;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-
-/* quiz dropdown lives in the exact same 560px column */
 .quiz-row select.priority-select{
   width:100%; min-width:0; margin:0;
   padding:10px 12px; border:2px solid #ddd; border-radius:10px;
@@ -114,7 +112,7 @@
 .quiz-row.neutral select{ border-color:#ddd;     background:#fff;   }
 .priority-select:focus-visible{
   outline:3px solid color-mix(in oklab, var(--orange) 35%, white);
-  outline-offset:2px; /* keep focus inside frame */
+  outline-offset:2px;
 }
 
 /* =========================
@@ -122,7 +120,9 @@
    ========================= */
 .spirit-destination{ text-align:center; padding-top:2px; }
 .destination-circle{
-  width:256px; height:256px; margin:6px auto 0; border-radius:50%;
+  width:clamp(220px, 22vw, 256px);
+  height:clamp(220px, 22vw, 256px);
+  margin:6px auto 0; border-radius:50%;
   background:var(--orange); color:#fff !important; display:grid; place-items:center;
   text-align:center; font-weight:900; line-height:1.36; font-size:18px; padding:14px 18px;
 }
@@ -132,12 +132,11 @@
    ========================= */
 .spirit-footer{
   position:relative; margin-top:16px; background:var(--grey-100) !important;
-  padding:18px 26px 36px;  /* extra bottom pad for buttons */
+  padding:18px 26px 36px;
 }
 .spirit-footer::before{
   content:""; position:absolute; left:10px; top:-8px; width:14px; height:14px; background:#fff; transform:rotate(45deg);
 }
-
 .footer-header{
   display:grid; grid-template-columns: 1fr auto 1fr; align-items:baseline;
   font-size:18px; color:var(--muted) !important; margin-bottom:10px;
@@ -148,15 +147,15 @@
   color:var(--orange) !important; font-size:38px; font-weight:900; margin:0; letter-spacing:.2px; justify-self:center;
 }
 
-/* Pill (view) & pill select (quiz) */
+/* Pill (view) & pill select (quiz) — same width as answer column */
 .orange-core-wrap{ display:flex; justify-content:center; }
 .orange-core{
   display:block; width:max-content; border:2px solid var(--orange); background:#f1f1f1;
   padding:8px 16px; margin:10px auto 20px; color:#7b7b7b !important; font-weight:800; font-size:18px;
 }
-/* same width as the 560px answer column above */
 .orange-core-select{
-  width:560px; max-width:100%;
+  width:min(560px, 90%);
+  max-width:100%;
   padding:10px 12px; border:2px solid #ddd; border-radius:10px;
   font-weight:800; font-size:18px; background:#fff; color:#333; margin:10px auto 20px;
 }
@@ -201,17 +200,26 @@
 /* =========================
    RESPONSIVE
    ========================= */
-@media (max-width:1200px){
-  /* shrink the dotted column, keep structure */
-  .priority-row{ grid-template-columns: 16px 200px 52px 1fr; }
-  .orange-core-select{ width:clamp(320px, 55vw, 560px); }
+/* Tighten before overflow happens on mid-width screens */
+@media (max-width:1320px){
+  .priority-row{
+    grid-template-columns: 16px minmax(150px,220px) 52px minmax(320px,520px);
+  }
+  .destination-circle{
+    width:clamp(210px, 20vw, 240px);
+    height:clamp(210px, 20vw, 240px);
+  }
 }
+
+/* Stack columns on tablets */
 @media (max-width:980px){
   .spirit-header{ grid-template-columns:1fr; min-height:auto; }
   .spirit-left{ height:240px; }
   .purpose-text{ top:78px; }
   .value-grid{ grid-template-columns:1fr 1fr; }
 }
+
+/* Single column values on phones */
 @media (max-width:560px){
   .value-grid{ grid-template-columns:1fr; }
 }
