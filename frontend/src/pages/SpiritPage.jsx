@@ -17,7 +17,7 @@ const DATA = {
   purpose: {
     label: "Purpose",
     correct: "Making low-cost travel easy",
-    distractors: ["Making high-cost travel luxurious", "Making every seat free"],
+    distractors: ["Seamlessly connecting Europe with warmest welcome in the sky", "Making every seat free"],
   },
   destination:
     "Europe’s most loved airline — winning for our customers, shareholders and people.",
@@ -26,29 +26,32 @@ const DATA = {
       id: "p1",
       correct: "Building Europe’s best network",
       distractors: [
-        "Becoming the world’s biggest carrier",
-        "Connecting every country in the world",
+        "Becoming the Europe’s biggest carrier",
+        "Becoming the Europe’s preferred carrier",
+        "Building Europe's best airline",
       ],
     },
     {
       id: "p2",
       correct: "Transforming revenue",
-      distractors: ["Maximising flight occupancy", "Expanding customer loyalty"],
+      distractors: ["Maintaining a sharp focus on cost efficiency","Expanding customer loyalty","Transforming profits"],
     },
     {
       id: "p3",
       correct: "Delivering ease and reliability",
       distractors: [
-        "Improving cabin seating",
-        "Offering the lowest fares always",
+        "Delivering efficient and easy travel",
+        "Always safe and reliable",
+        "",
       ],
     },
     {
       id: "p4",
       correct: "Driving our low-cost model",
       distractors: [
-        "Cutting all customer amenities",
+        "Driving our cost efficiency",
         "Reducing aircraft maintenance",
+        "Maximising profits - Minimising Cost",
       ],
     },
   ],
@@ -57,7 +60,7 @@ const DATA = {
       id: "bo-safe",
       title: "BE SAFE",
       correct: "Always with safety at our heart",
-      distractors: ["Safety is optional", "Safety only for long flights"],
+      distractors: ["Safety is not our priority", "Safety only when time efficient"],
     },
     {
       id: "bo-challenging",
@@ -65,20 +68,20 @@ const DATA = {
       correct: "Always challenging cost",
       distractors: [
         "Always reducing ticket prices to zero",
-        "Always ignoring costs",
+        "On our customers' side",
       ],
     },
     {
       id: "bo-bold",
       title: "BE BOLD",
       correct: "Making a positive difference",
-      distractors: ["Making a neutral impact", "Making a negative difference"],
+      distractors: ["Making a neutral impact", "In it together"],
     },
     {
       id: "bo-welcoming",
       title: "BE WELCOMING",
       correct: "Always warm and welcoming",
-      distractors: ["Always distant and cold", "Always neutral and reserved"],
+      distractors: ["Always distant and cold", "Always efficient"],
     },
   ],
 };
