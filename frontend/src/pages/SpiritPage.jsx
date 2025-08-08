@@ -1,5 +1,5 @@
 import React from "react";
-import "./SpiritPage.css";
+import "../SpiritPage.css";
 
 export default function SpiritPage() {
   const priorities = [
