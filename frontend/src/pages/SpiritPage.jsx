@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import "./SpiritPage.css";
+import "../SpiritPage.css";
 
 export default function SpiritPage() {
   // ===== CONTENT =====
