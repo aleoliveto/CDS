@@ -52,7 +52,7 @@
 .purpose-text p{ margin:0; font-size:22px; }
 
 /* =========================
-   PRIORITIES (poster-true grid, now fluid)
+   PRIORITIES (poster-true grid, fluid)
    ========================= */
 .spirit-priorities{ padding:0 2px; }
 .section-title{
@@ -61,10 +61,12 @@
 }
 .priority-list{ display:grid; gap:30px; margin:0; padding:0; }
 
-/* Fluid geometry: dot | dotted (min 160, max 260) | plane | answer (min 360, max 560) */
+/* Fluid geometry:
+   dot | dotted (min 170, max 260) | plane | answer (min 340, max 560)
+   -> keeps layout centered but squeezes before overflow */
 .priority-row{
   display:grid !important;
-  grid-template-columns: 16px minmax(160px,260px) 52px minmax(360px,560px);
+  grid-template-columns: 16px minmax(170px,260px) 52px minmax(340px,560px);
   align-items:center;
   column-gap:12px;
   position:relative;
@@ -120,8 +122,8 @@
    ========================= */
 .spirit-destination{ text-align:center; padding-top:2px; }
 .destination-circle{
-  width:clamp(220px, 22vw, 256px);
-  height:clamp(220px, 22vw, 256px);
+  width:clamp(200px, 20vw, 256px);
+  height:clamp(200px, 20vw, 256px);
   margin:6px auto 0; border-radius:50%;
   background:var(--orange); color:#fff !important; display:grid; place-items:center;
   text-align:center; font-weight:900; line-height:1.36; font-size:18px; padding:14px 18px;
@@ -147,21 +149,48 @@
   color:var(--orange) !important; font-size:38px; font-weight:900; margin:0; letter-spacing:.2px; justify-self:center;
 }
 
-/* Pill (view) & pill select (quiz) — same width as answer column */
-.orange-core-wrap{ display:flex; justify-content:center; }
+/* ===== “BE ORANGE” as a box (matches other value boxes) ===== */
+/* Keep legacy pill style around (view builds using it), but you can ignore it */
 .orange-core{
   display:block; width:max-content; border:2px solid var(--orange); background:#f1f1f1;
   padding:8px 16px; margin:10px auto 20px; color:#7b7b7b !important; font-weight:800; font-size:18px;
 }
-.orange-core-select{
+
+.orange-core-wrap{ display:flex; justify-content:center; }
+
+/* the box wrapper itself */
+.orange-core-box{
+  background:#fff !important;
+  border:2px solid var(--orange);
+  text-align:center;
+  padding:16px 14px 18px;
   width:min(560px, 90%);
-  max-width:100%;
-  padding:10px 12px; border:2px solid #ddd; border-radius:10px;
-  font-weight:800; font-size:18px; background:#fff; color:#333; margin:10px auto 20px;
+  margin:10px auto 20px;
 }
-.orange-core-select.correct{ border-color:#3fbf64; background:#f3fbf6; }
-.orange-core-select.wrong  { border-color:#ff6b6b; background:#fff6f6; }
-.orange-core-select.neutral{ border-color:#ddd;     background:#fff;   }
+.orange-core-box h3{
+  margin:0 0 6px 0;
+  color:var(--orange) !important;
+  font-size:20px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.2px;
+}
+
+/* the select inside the box (quiz mode) */
+.orange-core-select{
+  width:100%;
+  max-width:100%;
+  padding:10px 12px;
+  border:2px solid #ddd;
+  border-radius:10px;
+  font-weight:800;
+  font-size:18px;
+  background:#fff;
+  color:#333;
+}
+.orange-core-box.correct .orange-core-select{ border-color:#3fbf64; background:#f3fbf6; }
+.orange-core-box.wrong   .orange-core-select{ border-color:#ff6b6b; background:#fff6f6; }
+.orange-core-box.neutral .orange-core-select{ border-color:#ddd;     background:#fff;   }
 .orange-core-select:focus-visible{
   outline:3px solid color-mix(in oklab, var(--orange) 35%, white);
   outline-offset:2px;
@@ -201,13 +230,13 @@
    RESPONSIVE
    ========================= */
 /* Tighten before overflow happens on mid-width screens */
-@media (max-width:1320px){
+@media (max-width:1400px){
   .priority-row{
     grid-template-columns: 16px minmax(150px,220px) 52px minmax(320px,520px);
   }
   .destination-circle{
-    width:clamp(210px, 20vw, 240px);
-    height:clamp(210px, 20vw, 240px);
+    width:clamp(200px, 19vw, 230px);
+    height:clamp(200px, 19vw, 230px);
   }
 }
 
