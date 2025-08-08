@@ -1,77 +1,99 @@
-// Pure CSS-based SpiritPage.jsx
-import React from 'react';
-import '../SpiritPage.css';
+import React from "react";
+import "./SpiritPage.css";
 
-const SpiritPage = () => {
+export default function SpiritPage() {
   const priorities = [
-    'Building Europe’s best network',
-    'Transforming revenue',
-    'Delivering ease and reliability',
-    'Driving our low-cost model'
+    "Building Europe’s best network",
+    "Transforming revenue",
+    "Delivering ease and reliability",
+    "Driving our low-cost model",
   ];
 
   const values = [
-    { label: 'BE SAFE', desc: 'Always with safety at our heart' },
-    { label: 'BE CHALLENGING', desc: 'Always challenging cost' },
-    { label: 'BE BOLD', desc: 'Making a positive difference' },
-    { label: 'BE WELCOMING', desc: 'Always warm and welcoming' }
+    { label: "BE SAFE", desc: "Always with safety at our heart" },
+    { label: "BE CHALLENGING", desc: "Always challenging cost" },
+    { label: "BE BOLD", desc: "Making a positive difference" },
+    { label: "BE WELCOMING", desc: "Always warm and welcoming" },
   ];
 
   return (
-    <div className="spirit-container">
-      <div className="spirit-header">
-        <div className="spirit-triangle">
-          <div className="purpose-text">
-            <h2>PURPOSE</h2>
-            <p>Making low-cost<br />travel easy</p>
+    <section className="spirit-frame" aria-label="easyJet Orange Spirit">
+      {/* TOP (white) */}
+      <div className="spirit-top">
+        {/* PURPOSE + orange chevron */}
+        <div className="purpose">
+          <svg className="chevron" viewBox="0 0 320 380" preserveAspectRatio="none" aria-hidden="true">
+            {/* left edge + large chevron that pierces the footer */}
+            <polygon points="0,0 220,190 0,380" fill="#ff6600" />
+          </svg>
+
+          <div className="purpose-text" aria-labelledby="purpose-title">
+            <h2 id="purpose-title">PURPOSE</h2>
+            <p>
+              Making low-cost
+              <br />
+              travel easy
+            </p>
           </div>
         </div>
 
-        <div className="spirit-priorities">
+        {/* PRIORITIES */}
+        <div className="priorities">
           <h2 className="section-title">PRIORITIES</h2>
-          <div className="priority-list">
-            {priorities.map((item, index) => (
-              <div className="priority-row" key={index}>
-                <div className="dot" />
-                <div className="dotted-line" />
-                <div className="plane-icon">
+
+          <ul className="priority-list">
+            {priorities.map((t, i) => (
+              <li key={t} className="priority-row">
+                <span className="dot" aria-hidden="true" />
+                <span className="dotted" aria-hidden="true" />
+                <span className="plane" aria-hidden="true">
                   <img
                     src="https://img.icons8.com/ios-filled/50/ff6600/airplane-take-off.png"
-                    alt="Plane"
+                    alt=""
+                    width="20"
+                    height="20"
                   />
-                </div>
-                <div className="priority-label">{item}</div>
-              </div>
+                </span>
+                <span className="priority-text">{t}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
-        <div className="spirit-destination">
+        {/* DESTINATION */}
+        <div className="destination">
           <h2 className="section-title">DESTINATION</h2>
-          <div className="destination-circle">
-            Europe’s most loved airline —<br />winning for our customers,<br />shareholders and people.
+          <div className="dest-bubble" role="figure" aria-label="Destination statement">
+            Europe’s most loved airline —
+            <br />
+            winning for our customers,
+            <br />
+            shareholders and people.
           </div>
         </div>
       </div>
 
+      {/* FOOTER (grey) */}
       <div className="spirit-footer">
-        <div className="footer-header">
+        <div className="footer-top">
           <span>Made possible by our people</span>
-          <h2>BE ORANGE</h2>
+          <h2 className="be-orange">BE ORANGE</h2>
           <span>Being true to our promises</span>
         </div>
-        <div className="orange-core">Living the Orange Spirit</div>
-        <div className="value-grid">
-          {values.map((v, index) => (
-            <div className="value-box" key={index}>
+
+        <div className="orange-pill" aria-label="Living the Orange Spirit">
+          Living the Orange Spirit
+        </div>
+
+        <div className="values">
+          {values.map((v) => (
+            <div className="value" key={v.label}>
               <h3>{v.label}</h3>
               <p>{v.desc}</p>
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
-};
-
-export default SpiritPage;
+}
