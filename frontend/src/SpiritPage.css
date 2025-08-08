@@ -160,17 +160,37 @@ body, .spirit-root {
 }
 .band-center { color: var(--ej-orange); font-weight: 900; letter-spacing: 1px; }
 
-/* Center box (missing before) */
+/* === NEW: BE ORANGE center pill (matches white tiles) === */
 .orange-center-box{
-  margin: 12px auto 6px;
-  display: inline-block;
-  border: 2px solid var(--ej-orange);
-  color: #6b6f75;
-  font-weight: 700;
-  padding: 6px 14px;
-  border-radius: 8px;
-  background: #fff;
+  grid-column: 2;               /* centered under BE ORANGE */
+  justify-self: center;
+  margin: 8px auto 6px;
+  width: min(420px, 90%);
+  position: relative;
 }
+.orange-center-card{
+  background:#fff;
+  border:2px solid #e1e3e7;
+  border-radius:8px;
+  padding:10px 12px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.06);
+}
+.orange-center-sub{
+  color:#454a50;
+  font-weight:600;
+  font-size:14px;
+  text-align:center;
+}
+.orange-center-box.ok .orange-center-card{
+  border-color:rgba(31,143,58,.6);
+  background:rgba(31,143,58,.06);
+}
+.orange-center-box.no .orange-center-card{
+  border-color:rgba(198,40,40,.6);
+  background:rgba(198,40,40,.06);
+}
+.orange-center-box .pill-select{ position:relative; padding-right:28px; }
+.orange-center-box .mark{ position:absolute; right:6px; top:50%; transform:translateY(-50%); }
 
 /* Value tiles */
 .orange-pills {
