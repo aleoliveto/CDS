@@ -8,53 +8,52 @@ const SpiritPage = () => {
     "Building Europe’s best network",
     "Transforming revenue",
     "Delivering ease and reliability",
-    "Driving our low-cost model"
+    "Driving our low-cost model",
   ];
 
   const beOrangeValues = [
-    { label: "Living the Orange Spirit", correct: "Living the Orange Spirit", options: ["Living the Orange Spirit", "Living the Blue Spirit", "Flying the Orange Sky"] },
-    { label: "BE SAFE", correct: "Always with safety at our heart", options: ["Always with safety at our heart", "Sometimes safety", "Only safety at takeoff"] },
-    { label: "BE CHALLENGING", correct: "Always challenging cost", options: ["Always challenging cost", "Sometimes challenging cost", "Never challenging cost"] },
-    { label: "BE BOLD", correct: "Making a positive difference", options: ["Making a positive difference", "Making a small change", "Avoiding any difference"] },
-    { label: "BE WELCOMING", correct: "Always warm and welcoming", options: ["Always warm and welcoming", "Sometimes welcoming", "Never welcoming"] }
+    { label: "BE SAFE", value: "Always with safety at our heart" },
+    { label: "BE CHALLENGING", value: "Always challenging cost" },
+    { label: "BE BOLD", value: "Making a positive difference" },
+    { label: "BE WELCOMING", value: "Always warm and welcoming" },
   ];
 
+  const dropdownOptions = (correct) => {
+    const distractors = [
+      "Keeping our passengers entertained",
+      "Always flying to new destinations",
+      "Making ticket prices higher",
+    ];
+    return [correct, ...distractors].sort(() => Math.random() - 0.5);
+  };
+
   return (
-    <div className="spirit-container">
+    <div className="spirit-wrapper">
       {/* Header */}
       <header className="spirit-header">
-        <h1>easyJet Spirit</h1>
-        <button
-          className="quiz-toggle"
-          onClick={() => setQuizMode(true)}
-          disabled={quizMode}
-        >
-          {quizMode ? "Quiz Mode Active" : "Switch to Quiz Mode"}
-        </button>
+        <h1 className="spirit-title">OUR PURPOSE</h1>
+        <p className="spirit-subtitle">Making low-cost travel easy</p>
+        {!quizMode && (
+          <button className="quiz-btn" onClick={() => setQuizMode(true)}>
+            Switch to Quiz Mode
+          </button>
+        )}
       </header>
-
-      {/* Purpose */}
-      <section className="purpose-card">
-        <h2>PURPOSE</h2>
-        <p>Making low-cost travel easy</p>
-      </section>
 
       {/* Priorities */}
       <section className="priorities-section">
-        <h2>PRIORITIES</h2>
+        <h2 className="section-heading">OUR PRIORITIES</h2>
         <div className="priorities-grid">
-          {priorities.map((item, i) => (
-            <div key={i} className="priority-card">
+          {priorities.map((priority, idx) => (
+            <div key={idx} className="priority-card">
               {quizMode ? (
                 <select className="quiz-select">
-                  {[item, "Another option", "Different answer"].map(
-                    (opt, idx) => (
-                      <option key={idx}>{opt}</option>
-                    )
-                  )}
+                  {dropdownOptions(priority).map((opt, i) => (
+                    <option key={i}>{opt}</option>
+                  ))}
                 </select>
               ) : (
-                <p>{item}</p>
+                <p>{priority}</p>
               )}
             </div>
           ))}
@@ -62,39 +61,45 @@ const SpiritPage = () => {
       </section>
 
       {/* Destination */}
-      <section className="destination-banner">
-        <h2>DESTINATION</h2>
+      <section className="destination-section">
+        <h2 className="section-heading">DESTINATION</h2>
         <p>
-          Europe’s most loved airline — winning for our customers, shareholders
-          and people.
+          Europe’s most loved airline — winning for our customers,
+          shareholders, and people.
         </p>
       </section>
 
       {/* BE ORANGE */}
       <section className="be-orange-section">
-        <h2>BE ORANGE</h2>
+        <h2 className="section-heading">BE ORANGE</h2>
         <div className="be-orange-grid">
-          {beOrangeValues.map((value, i) => (
-            <div key={i} className="be-orange-card">
-              <h3>{value.label}</h3>
+          <div className="be-orange-card main-card">
+            {quizMode ? (
+              <select className="quiz-select">
+                {dropdownOptions("Living the Orange Spirit").map((opt, i) => (
+                  <option key={i}>{opt}</option>
+                ))}
+              </select>
+            ) : (
+              <p>Living the Orange Spirit</p>
+            )}
+          </div>
+          {beOrangeValues.map((item, idx) => (
+            <div key={idx} className="be-orange-card">
+              <h3>{item.label}</h3>
               {quizMode ? (
                 <select className="quiz-select">
-                  {value.options.map((opt, idx) => (
-                    <option key={idx}>{opt}</option>
+                  {dropdownOptions(item.value).map((opt, i) => (
+                    <option key={i}>{opt}</option>
                   ))}
                 </select>
               ) : (
-                <p>{value.correct}</p>
+                <p>{item.value}</p>
               )}
             </div>
           ))}
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="spirit-footer">
-        Made possible by our people
-      </footer>
     </div>
   );
 };
