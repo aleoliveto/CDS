@@ -1,4 +1,4 @@
-/* easyJet SpiritPage — Premium v3 (no clipping, branded, responsive) */
+/* easyJet SpiritPage — Presentation Build (polished & bounded) */
 
 .spirit-root{
   --ej-primary:#ff6600;
@@ -12,74 +12,65 @@
 
   color:var(--ej-text);
   background:
-    radial-gradient(1200px 400px at 20% -200px, rgba(255,102,0,0.06), transparent 55%),
-    linear-gradient(#fff, #fff);
+    radial-gradient(1100px 380px at 18% -180px, rgba(255,102,0,.06), transparent 55%),
+    linear-gradient(#fff,#fff);
   min-height:100dvh;
   display:flex;
   flex-direction:column;
   font-family: ui-sans-serif, -apple-system, Segoe UI, Inter, Roboto, Helvetica, Arial, "Noto Sans";
 }
 
-/* Left orange rail (brand accent) */
+/* Brand accent rail */
 .ej-rail{
-  position:fixed;
-  left:0; top:0; bottom:0;
-  width:10px;
+  position:fixed; left:0; top:0; bottom:0; width:10px;
   background:linear-gradient(180deg,#ff7a1a 0%, #ff6600 60%, #ff7a1a 100%);
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.04), 0 0 20px rgba(255,102,0,0.25) inset;
-  z-index:0;
-  pointer-events:none;
+  box-shadow:0 0 0 1px rgba(0,0,0,.04), inset 0 0 20px rgba(255,102,0,.25);
+  z-index:0; pointer-events:none;
 }
 
 /* Header */
 .ej-header{
   position:sticky; top:0; z-index:5;
-  background:linear-gradient(180deg,#fff 75%, rgba(255,255,255,0.92));
+  background:linear-gradient(180deg,#fff 75%, rgba(255,255,255,.92));
   border-bottom:1px solid var(--ej-border);
   padding:16px clamp(18px,3vw,36px);
   display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
-.ej-brand{display:flex;align-items:center;gap:12px;}
+.ej-brand{display:flex;align-items:center;gap:12px}
 .ej-logo-dot{width:18px;height:18px;border-radius:50%;background:var(--ej-primary);
-  box-shadow:0 0 0 6px rgba(255,102,0,.16);animation:dotPulse 2.5s ease-in-out infinite;}
+  box-shadow:0 0 0 6px rgba(255,102,0,.16); animation:dotPulse 2.5s ease-in-out infinite}
 @keyframes dotPulse{0%,100%{box-shadow:0 0 0 6px rgba(255,102,0,.16)}50%{box-shadow:0 0 0 11px rgba(255,102,0,.22)}}
-.ej-title{font-size:clamp(18px,2vw,22px);font-weight:900;letter-spacing:.1px;margin:0}
-
+.ej-title{margin:0;font-size:clamp(18px,2vw,22px);font-weight:900;letter-spacing:.1px}
 .ej-mode{display:flex;align-items:center;gap:12px}
-.mode-pill{
-  font-size:12px;color:var(--ej-muted);border:1px solid var(--ej-border);border-radius:999px;
-  padding:6px 10px;background:#fff
-}
+.mode-pill{font-size:12px;color:var(--ej-muted);border:1px solid var(--ej-border);border-radius:999px;padding:6px 10px;background:#fff}
 .mode-pill.active{color:#0f0f0f;border-color:rgba(31,143,58,.25);background:rgba(31,143,58,.08)}
 .ej-btn{
   appearance:none;border:none;border-radius:12px;padding:10px 14px;font-weight:900;color:#fff;cursor:pointer;
   background:linear-gradient(180deg,#ff7a1a,#ff6600);
-  box-shadow:0 8px 22px rgba(255,102,0,.28);
+  box-shadow:0 10px 24px rgba(255,102,0,.28);
   transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease
 }
-.ej-btn:hover{transform:translateY(-1px); box-shadow:0 12px 28px rgba(255,102,0,.34)}
+.ej-btn:hover{transform:translateY(-1px); box-shadow:0 14px 30px rgba(255,102,0,.34)}
 .ej-btn:active{transform:translateY(0)}
 .ej-btn[disabled],.ej-btn[aria-disabled="true"]{opacity:.65;cursor:not-allowed;box-shadow:none}
 
-/* Visual guard: keeps content inside a soft frame, removes clipping */
+/* Guarded canvas — prevents any visual bleed */
 .ej-guard{
   width:min(1280px,96vw);
   margin:18px auto 0;
   border-radius:28px;
   border:1px solid var(--ej-border);
   background:rgba(255,255,255,0.9);
-  box-shadow:
-    0 10px 30px rgba(0,0,0,.06),
-    0 0 0 6px rgba(0,0,0,.015) inset;
-  overflow:clip; /* hard containment, but text remains visible */
-  contain:layout paint; /* prevents bleed from inner effects */
+  box-shadow:0 10px 30px rgba(0,0,0,.06), inset 0 0 0 6px rgba(0,0,0,.015);
+  overflow:clip;               /* HARD CONTAINMENT */
+  contain:layout paint;        /* keep inner glows inside */
   z-index:1;
 }
 
 /* Main content */
 .ej-content{
   width:100%;
-  padding:28px clamp(18px,3vw,36px) 120px; /* bottom space so last row never touches footer */
+  padding:28px clamp(18px,3vw,36px) 120px; /* bottom air so last row never clips */
   display:grid;
   gap:28px;
 }
@@ -94,46 +85,131 @@
 }
 .ej-tag-neutral{color:#2f3438 !important;background:#fff !important;border-color:var(--ej-border) !important}
 
-/* Typographic helpers */
+/* Type */
 .ej-h2{margin:0;font-size:clamp(20px,2.1vw,26px);font-weight:900;letter-spacing:-.2px;line-height:1.15}
 .ej-h3{margin:0;font-size:clamp(18px,1.6vw,22px);font-weight:900;letter-spacing:-.15px}
 .ej-subtle{font-size:11px;font-weight:800;color:var(--ej-muted);text-transform:uppercase;letter-spacing:.25px;margin-bottom:6px}
 .ej-lead{font-size:clamp(15px,1.3vw,17px);color:#2a2d30;margin:10px 0 0}
+.ej-muted{color:var(--ej-muted)}
 
-/* Cards — frosted look with accent top border */
+/* Cards — glass + orange accent */
 .ej-card{
   position:relative;
-  background:linear-gradient(180deg, rgba(255,255,255,.95), #fff);
+  background:linear-gradient(180deg, rgba(255,255,255,.96), #fff);
   border:1px solid var(--ej-border);
   border-radius:22px;
   padding:clamp(16px,2vw,22px);
   box-shadow:0 8px 24px rgba(0,0,0,.05);
   transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .22s ease;
-  overflow:clip; /* prevents inner effects from bleeding */
+  overflow:clip;
 }
-.elev{box-shadow:0 10px 26px rgba(0,0,0,.06)}
+.card-hero{min-height:160px}
 .ej-card::before{
   content:"";
   position:absolute;left:0;right:0;top:0;height:4px;border-top-left-radius:22px;border-top-right-radius:22px;
   background:linear-gradient(90deg, #ff7a1a, #ff6600)
 }
-.ej-card:hover{
-  transform:translateY(-3px);
-  box-shadow:0 16px 32px rgba(0,0,0,.10);
-  border-color:rgba(255,102,0,.28)
-}
+.ej-card:hover{transform:translateY(-3px); box-shadow:0 16px 32px rgba(0,0,0,.10); border-color:rgba(255,102,0,.28)}
 .ej-card-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
 .ej-card-title{margin:0 0 6px;font-weight:900;letter-spacing:-.1px;line-height:1.15}
 .ej-card-copy{margin:0;color:var(--ej-muted)}
-/* Equal height inside grids */
 .ej-grid > .ej-card{height:100%}
 
-/* Section headers */
+/* Sections & grids */
 .ej-section{display:grid;gap:16px}
 .ej-section-head{display:flex;align-items:center;gap:12px}
+.ej-section-head.compact{margin-bottom:6px}
+.group-title{color:#202326;font-weight:900}
 
-/* Grids */
 .ej-grid{display:grid;gap:16px;align-items:stretch}
 .ej-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .ej-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.
+.ej-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1100px){
+  .ej-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ej-grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:720px){
+  .ej-grid-2,.ej-grid-3,.ej-grid-4{grid-template-columns:1fr}
+}
+
+/* QUIZ */
+.ej-quiz{display:grid;gap:24px;animation:fadeInSoft .38s ease both}
+@keyframes fadeInSoft{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ej-quiz-group{
+  border:1px solid var(--ej-border);
+  border-radius:18px;
+  background:#fff;
+  padding:16px;
+  box-shadow:0 8px 24px rgba(0,0,0,.05);
+  overflow:clip;
+}
+.quiz-list{display:grid;gap:14px;margin-top:8px}
+.quiz-row{
+  display:grid;grid-template-columns:1fr min(700px,60%);
+  gap:12px;align-items:center;
+  padding:12px;
+  border:1px solid var(--ej-border);
+  border-radius:12px;background:#fff;
+  transition:border-color .16s ease, background .16s ease, transform .16s ease;
+  overflow:clip;
+}
+@media (max-width:900px){.quiz-row{grid-template-columns:1fr}}
+.quiz-label{font-size:14px;color:#202326;font-weight:800}
+.quiz-input-wrap{position:relative;display:flex;align-items:center;gap:8px}
+
+/* Branded select (no default look) */
+.ej-select{
+  -webkit-appearance:none; appearance:none; background-color:#fff;
+  background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='%23ff6600' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center; background-size:16px;
+  width:100%; border-radius:12px; border:1px solid var(--ej-border);
+  padding:10px 40px 10px 12px; font-size:14px; outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease
+}
+.ej-select:hover{border-color:rgba(255,102,0,.35)}
+.ej-select:focus{box-shadow:0 0 0 4px rgba(255,102,0,.15);border-color:var(--ej-primary)}
+select.ej-select::-ms-expand{display:none} /* IE/Edge legacy */
+
+.quiz-mark{position:absolute;right:10px;font-size:18px;pointer-events:none}
+
+/* Feedback */
+.quiz-row.ok{border-color:rgba(31,143,58,.35);background:rgba(31,143,58,.06);animation:okFade .42s ease}
+.ej-select.is-correct{border-color:rgba(31,143,58,.6);background:rgba(31,143,58,.08)}
+.ok-mark{color:var(--ej-ok)}
+@keyframes okFade{from{background:#fff}to{background:rgba(31,143,58,.06)}}
+.quiz-row.no{border-color:rgba(198,40,40,.45);background:rgba(198,40,40,.06)}
+.ej-select.is-wrong{border-color:rgba(198,40,40,.6);background:rgba(198,40,40,.08)}
+.no-mark{color:var(--ej-no)}
+.shake-now{animation:ejShake .5s ease}
+@keyframes ejShake{10%,90%{transform:translateX(-1px)}20%,80%{transform:translateX(2px)}30%,50%,70%{transform:translateX(-4px)}40%,60%{transform:translateX(4px)}}
+
+/* Motion polish */
+.fade-in{animation:fadeIn .45s ease both}
+.slide-in{animation:slideIn .42s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){
+  .ej-card,.ej-select,.quiz-row,.fade-in,.slide-in,.ej-quiz{transition:none!important;animation:none!important}
+}
+
+/* Footer */
+.ej-footer{
+  margin-top:auto;background:#fff;border-top:1px solid var(--ej-border);
+  padding:12px clamp(18px,3vw,36px);
+  display:flex;align-items:center;justify-content:space-between
+}
+.ej-foot-left{display:flex;align-items:center;gap:10px}
+.ej-kicker{font-size:12px;color:#444;font-weight:900;letter-spacing:.3px}
+.ej-divider{width:1px;height:14px;background:var(--ej-border)}
+.ej-foot-right .ej-pill{
+  font-size:12px;color:var(--ej-primary);
+  border:1px solid rgba(255,102,0,.35);background:rgba(255,102,0,.07);
+  padding:6px 10px;border-radius:999px
+}
+
+/* Global safety */
+*,
+*::before,*::after{box-sizing:border-box}
+img,video{max-width:100%;height:auto;display:block}
+html,body{overflow-x:hidden;background:#fff}
