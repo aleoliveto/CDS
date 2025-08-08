@@ -2,156 +2,99 @@ import React, { useState } from "react";
 import "../SpiritPage.css";
 
 const SpiritPage = () => {
-  const [mode, setMode] = useState("normal"); // 'normal' or 'quiz'
+  const [quizMode, setQuizMode] = useState(false);
 
   const priorities = [
-    {
-      text: "Building Europe’s best network",
-      options: [
-        "Building Europe’s best network",
-        "Expanding across Asia",
-        "Cutting routes entirely",
-      ],
-    },
-    {
-      text: "Transforming revenue",
-      options: [
-        "Transforming revenue",
-        "Focusing only on costs",
-        "Reducing ticket sales",
-      ],
-    },
-    {
-      text: "Delivering ease and reliability",
-      options: [
-        "Delivering ease and reliability",
-        "Focusing on complex processes",
-        "Making travel harder",
-      ],
-    },
-    {
-      text: "Driving our low-cost model",
-      options: [
-        "Driving our low-cost model",
-        "Raising fares dramatically",
-        "Ignoring efficiency",
-      ],
-    },
+    "Building Europe’s best network",
+    "Transforming revenue",
+    "Delivering ease and reliability",
+    "Driving our low-cost model"
   ];
 
   const beOrangeValues = [
-    {
-      label: "BE SAFE",
-      value: "Always with safety at our heart",
-      options: [
-        "Always with safety at our heart",
-        "Safety is optional",
-        "Ignore safety protocols",
-      ],
-    },
-    {
-      label: "BE CHALLENGING",
-      value: "Always challenging cost",
-      options: [
-        "Always challenging cost",
-        "Avoid cost control",
-        "Spend without limits",
-      ],
-    },
-    {
-      label: "BE BOLD",
-      value: "Making a positive difference",
-      options: [
-        "Making a positive difference",
-        "Avoid making change",
-        "Follow the crowd",
-      ],
-    },
-    {
-      label: "BE WELCOMING",
-      value: "Always warm and welcoming",
-      options: [
-        "Always warm and welcoming",
-        "Cold and unapproachable",
-        "Avoid passenger contact",
-      ],
-    },
+    { label: "Living the Orange Spirit", correct: "Living the Orange Spirit", options: ["Living the Orange Spirit", "Living the Blue Spirit", "Flying the Orange Sky"] },
+    { label: "BE SAFE", correct: "Always with safety at our heart", options: ["Always with safety at our heart", "Sometimes safety", "Only safety at takeoff"] },
+    { label: "BE CHALLENGING", correct: "Always challenging cost", options: ["Always challenging cost", "Sometimes challenging cost", "Never challenging cost"] },
+    { label: "BE BOLD", correct: "Making a positive difference", options: ["Making a positive difference", "Making a small change", "Avoiding any difference"] },
+    { label: "BE WELCOMING", correct: "Always warm and welcoming", options: ["Always warm and welcoming", "Sometimes welcoming", "Never welcoming"] }
   ];
 
   return (
     <div className="spirit-container">
-      {/* Toggle button for demo (remove in final) */}
-      {mode === "normal" && (
+      {/* Header */}
+      <header className="spirit-header">
+        <h1>easyJet Spirit</h1>
         <button
-          className="mode-btn"
-          onClick={() => setMode("quiz")}
+          className="quiz-toggle"
+          onClick={() => setQuizMode(true)}
+          disabled={quizMode}
         >
-          Switch to Quiz Mode
+          {quizMode ? "Quiz Mode Active" : "Switch to Quiz Mode"}
         </button>
-      )}
+      </header>
 
-      <div className="spirit-layout">
-        {/* Purpose Section */}
-        <div className="purpose-section">
-          <div className="purpose-content">
-            <h3>PURPOSE</h3>
-            <p>Making low-cost travel easy</p>
-          </div>
-        </div>
+      {/* Purpose */}
+      <section className="purpose-card">
+        <h2>PURPOSE</h2>
+        <p>Making low-cost travel easy</p>
+      </section>
 
-        {/* Priorities */}
-        <div className="priorities-section">
-          <h2>PRIORITIES</h2>
-          <div className="priorities-list">
-            {priorities.map((item, idx) => (
-              <div className="priority-card" key={idx}>
-                {mode === "normal" ? (
-                  <span>{item.text}</span>
-                ) : (
-                  <select>
-                    {item.options.map((opt, i) => (
-                      <option key={i}>{opt}</option>
-                    ))}
-                  </select>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Destination */}
-        <div className="destination-section">
-          <h2>DESTINATION</h2>
-          <div className="destination-circle">
-            Europe’s most loved airline —
-            <br />
-            winning for our customers,
-            <br />
-            shareholders and people.
-          </div>
-        </div>
-      </div>
-
-      {/* BE ORANGE */}
-      <div className="be-orange-section">
-        <h2>BE ORANGE</h2>
-        <div className="be-orange-values">
-          {beOrangeValues.map((item, idx) => (
-            <div className="value-card" key={idx}>
-              <label>{item.label}</label>
-              {mode === "normal" ? (
-                <span>{item.value}</span>
-              ) : (
-                <select>
-                  {item.options.map((opt, i) => (
-                    <option key={i}>{opt}</option>
-                  ))}
+      {/* Priorities */}
+      <section className="priorities-section">
+        <h2>PRIORITIES</h2>
+        <div className="priorities-grid">
+          {priorities.map((item, i) => (
+            <div key={i} className="priority-card">
+              {quizMode ? (
+                <select className="quiz-select">
+                  {[item, "Another option", "Different answer"].map(
+                    (opt, idx) => (
+                      <option key={idx}>{opt}</option>
+                    )
+                  )}
                 </select>
+              ) : (
+                <p>{item}</p>
               )}
             </div>
           ))}
         </div>
-      </div>
+      </section>
+
+      {/* Destination */}
+      <section className="destination-banner">
+        <h2>DESTINATION</h2>
+        <p>
+          Europe’s most loved airline — winning for our customers, shareholders
+          and people.
+        </p>
+      </section>
+
+      {/* BE ORANGE */}
+      <section className="be-orange-section">
+        <h2>BE ORANGE</h2>
+        <div className="be-orange-grid">
+          {beOrangeValues.map((value, i) => (
+            <div key={i} className="be-orange-card">
+              <h3>{value.label}</h3>
+              {quizMode ? (
+                <select className="quiz-select">
+                  {value.options.map((opt, idx) => (
+                    <option key={idx}>{opt}</option>
+                  ))}
+                </select>
+              ) : (
+                <p>{value.correct}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="spirit-footer">
+        Made possible by our people
+      </footer>
     </div>
   );
 };
