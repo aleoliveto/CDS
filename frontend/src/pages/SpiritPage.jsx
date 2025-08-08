@@ -2,11 +2,12 @@ import React, { useMemo, useState, useEffect } from "react";
 import "../SpiritPage.css";
 
 /**
- * easyJet SpiritPage — Presentation Build
- * - View Mode: branded, premium layout
- * - Quiz Mode: randomized dropdown MCQs with instant feedback
- * - One-way switch to Quiz Mode (locked)
- * - Strict containment: no overflow/clipping at any breakpoint
+ * easyJet SpiritPage — Board-Style Build
+ * - View Mode: mirrors the internal “board” layout (chevron Purpose, dotted Priorities,
+ *   Destination circle, BE ORANGE band)
+ * - Quiz Mode: dropdown MCQs with randomized distractors, one-way switch
+ * - Instant feedback: ✅ green fade / ❌ red shake
+ * - Strict containment & responsive (desktop + iPad)
  */
 
 const DATA = {
@@ -54,17 +55,17 @@ const DATA = {
   beOrange: [
     {
       label: "Living the Orange Spirit",
-      hint: "Orange Spirit",
+      hint: "Made possible by our people",
       distractors: ["Living the Green Spirit", "Embracing the Blue Vision"],
     },
     {
       label: "BE SAFE — Always with safety at our heart",
-      hint: "BE SAFE",
+      hint: "—",
       distractors: ["Safety is optional", "Safety only for long flights"],
     },
     {
       label: "BE CHALLENGING — Always challenging cost",
-      hint: "BE CHALLENGING",
+      hint: "—",
       distractors: [
         "Always reducing ticket prices to zero",
         "Always ignoring costs",
@@ -72,12 +73,12 @@ const DATA = {
     },
     {
       label: "BE BOLD — Making a positive difference",
-      hint: "BE BOLD",
+      hint: "—",
       distractors: ["Making a neutral impact", "Making a negative difference"],
     },
     {
       label: "BE WELCOMING — Always warm and welcoming",
-      hint: "BE WELCOMING",
+      hint: "Being true to our promises",
       distractors: [
         "Always distant and cold",
         "Always neutral and reserved",
@@ -86,14 +87,14 @@ const DATA = {
   ],
 };
 
-// Shuffle (Fisher–Yates)
-function shuffle(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
+// Utils
+function shuffle(a) {
+  const arr = a.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return a;
+  return arr;
 }
 
 function buildQuizItems() {
@@ -125,7 +126,7 @@ function buildQuizItems() {
     items.push({
       id: `orange-${i}`,
       group: "BE ORANGE",
-      prompt: `Choose the real phrase for ${v.hint}`,
+      prompt: `Choose the real phrase`,
       correct: v.label,
       options: shuffle([v.label, ...v.distractors]),
     })
@@ -133,12 +134,17 @@ function buildQuizItems() {
   return items;
 }
 
-const Tag = ({ children, tone = "primary" }) => (
-  <span className={`ej-tag ej-tag-${tone}`}>{children}</span>
-);
-
-const Card = ({ children, className = "" }) => (
-  <article className={`ej-card ${className}`}>{children}</article>
+// Small inline airplane icon
+const Plane = () => (
+  <svg className="plane-ic" viewBox="0 0 24 24" aria-hidden>
+    <path
+      d="M2 13l8 0 4 7 2-1-2-6 5 0 2 3 2-1-2-3 2-3-2-1-2 3-5 0 2-6-2-1-4 7-8 0z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinejoin="round"
+    />
+  </svg>
 );
 
 export default function SpiritPage() {
@@ -146,7 +152,6 @@ export default function SpiritPage() {
   const [locked, setLocked] = useState(false);
   const [answers, setAnswers] = useState({});
   const [status, setStatus] = useState({});
-
   const quizItems = useMemo(buildQuizItems, []);
 
   useEffect(() => {
@@ -173,13 +178,8 @@ export default function SpiritPage() {
 
   return (
     <div className="spirit-root">
-      <div className="ej-rail" aria-hidden />
-
       <header className="ej-header">
-        <div className="ej-brand">
-          <div className="ej-logo-dot" />
-          <h1 className="ej-title">easyJet Spirit</h1>
-        </div>
+        <h1 className="ej-title">easyJet Spirit</h1>
         <div className="ej-mode">
           <span className={`mode-pill ${quizMode ? "active" : ""}`}>
             {quizMode ? "Quiz Mode (locked)" : "View Mode"}
@@ -189,187 +189,152 @@ export default function SpiritPage() {
             onClick={() => setQuizMode(true)}
             disabled={locked}
             aria-disabled={locked}
-            title={locked ? "Quiz Mode is locked" : "Switch to Quiz Mode"}
           >
             {locked ? "Quiz Mode" : "Start Quiz"}
           </button>
         </div>
       </header>
 
-      {/* Guarded canvas to prevent any bleed/clipping */}
-      <div className="ej-guard">
-        {!quizMode ? (
-          <main className="ej-content">
-            {/* Purpose / Destination */}
-            <section className="ej-grid ej-grid-2">
-              <Card className="card-hero fade-in">
-                <div className="ej-card-head">
-                  <Tag>Purpose</Tag>
-                  <h2 className="ej-h2">Making low-cost travel easy</h2>
+      {!quizMode ? (
+        <main className="board-wrap" role="main">
+          {/* TOP STRIP: PRIORITIES heading */}
+          <div className="board-head">
+            <div className="board-head-left">PRIORITIES</div>
+            <div className="board-head-right">DESTINATION</div>
+          </div>
+
+          {/* CORE ROW: chevron purpose, priorities list, destination circle */}
+          <section className="board-core">
+            {/* Purpose chevron */}
+            <aside className="purpose">
+              <div className="purpose-inner">
+                <div className="purpose-title">PURPOSE</div>
+                <div className="purpose-body">
+                  <div>Making</div>
+                  <div>low-cost</div>
+                  <div>travel easy</div>
                 </div>
-                <p className="ej-lead">
-                  We exist to make travel simple, affordable, and accessible —
-                  with the reliability our customers expect.
-                </p>
-              </Card>
-
-              <Card className="card-hero fade-in">
-                <div className="ej-card-head">
-                  <Tag tone="neutral">Destination</Tag>
-                  <h2 className="ej-h2">
-                    Europe’s most loved airline — winning for our customers,
-                    shareholders and people.
-                  </h2>
-                </div>
-                <p className="ej-lead">
-                  Our destination is clear: the airline people choose, trust and
-                  recommend.
-                </p>
-              </Card>
-            </section>
-
-            {/* Priorities */}
-            <section className="ej-section">
-              <div className="ej-section-head">
-                <Tag>Priorities</Tag>
-                <h3 className="ej-h3">How we win</h3>
               </div>
+              <div className="purpose-chevron" aria-hidden />
+            </aside>
 
-              <div className="ej-grid ej-grid-4">
-                {DATA.priorities.map((p, i) => (
-                  <Card key={i} className="slide-in">
-                    <h4 className="ej-card-title">{p.label}</h4>
-                    <p className="ej-card-copy">
-                      Focused execution to strengthen the core and unlock
-                      growth.
-                    </p>
-                  </Card>
-                ))}
-              </div>
-            </section>
-
-            {/* BE ORANGE */}
-            <section className="ej-section">
-              <div className="ej-section-head">
-                <Tag>BE ORANGE</Tag>
-                <h3 className="ej-h3">How we show up</h3>
-              </div>
-
-              <div className="ej-grid ej-grid-3">
-                {DATA.beOrange.map((v, i) => (
-                  <Card key={i} className="fade-in">
-                    <div className="ej-subtle">{v.hint}</div>
-                    <h4 className="ej-card-title">{v.label}</h4>
-                    <p className="ej-card-copy">
-                      The orange thread in everything we do — for customers,
-                      colleagues and our communities.
-                    </p>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          </main>
-        ) : (
-          <main className="ej-content">
-            <section className="ej-quiz-head">
-              <h2 className="ej-h2">Quiz Mode</h2>
-              <p className="ej-muted">
-                Select the real easyJet phrase from each dropdown. Instant
-                feedback will confirm your choices. Once in Quiz Mode, you can’t
-                return to View Mode.
-              </p>
-            </section>
-
-            <section className="ej-quiz">
-              {["Purpose", "Destination", "Priorities", "BE ORANGE"].map(
-                (group) => (
-                  <div key={group} className="ej-quiz-group">
-                    <div className="ej-section-head compact">
-                      <Tag>{group}</Tag>
-                      <h3 className="group-title ej-h3">{group}</h3>
-                    </div>
-
-                    <div className="quiz-list">
-                      {quizItems
-                        .filter((q) => q.group === group)
-                        .map((q) => {
-                          const st = status[q.id];
-                          const val = answers[q.id] ?? "";
-                          const isCorrect = st === "correct";
-                          const isWrong = st === "wrong";
-
-                          return (
-                            <div
-                              id={`row-${q.id}`}
-                              key={q.id}
-                              className={`quiz-row ${
-                                isCorrect ? "ok" : isWrong ? "no" : ""
-                              }`}
-                            >
-                              <label
-                                htmlFor={`sel-${q.id}`}
-                                className="quiz-label"
-                              >
-                                {q.prompt}
-                              </label>
-
-                              <div className="quiz-input-wrap">
-                                <select
-                                  id={`sel-${q.id}`}
-                                  className={`ej-select ${
-                                    isCorrect
-                                      ? "is-correct"
-                                      : isWrong
-                                      ? "is-wrong"
-                                      : ""
-                                  }`}
-                                  value={val}
-                                  onChange={(e) =>
-                                    handleSelect(
-                                      q.id,
-                                      e.target.value,
-                                      q.correct
-                                    )
-                                  }
-                                >
-                                  <option value="" disabled>
-                                    Select the correct phrase…
-                                  </option>
-                                  {q.options.map((opt, idx) => (
-                                    <option key={idx} value={opt}>
-                                      {opt}
-                                    </option>
-                                  ))}
-                                </select>
-
-                                {isCorrect && (
-                                  <span className="quiz-mark ok-mark">✅</span>
-                                )}
-                                {isWrong && (
-                                  <span className="quiz-mark no-mark">❌</span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
+            {/* Priorities list with dotted leaders and plane icons */}
+            <div className="prio-list">
+              {DATA.priorities.map((p, i) => (
+                <div key={i} className="prio-row">
+                  <div className="prio-dot" />
+                  <div className="prio-leader">
+                    <Plane />
+                    <span className="prio-text">{p.label}</span>
                   </div>
-                )
-              )}
+                </div>
+              ))}
+            </div>
+
+            {/* Destination big circle */}
+            <aside className="destination">
+              <div className="dest-circle">
+                <div className="dest-text">
+                  Europe’s most loved airline — winning for our customers,
+                  shareholders and people.
+                </div>
+              </div>
+            </aside>
+          </section>
+
+          {/* BE ORANGE band */}
+          <section className="orange-band">
+            <div className="orange-band-top">
+              <div className="band-col">Made possible by our people</div>
+              <div className="band-center">BE ORANGE</div>
+              <div className="band-col">Being true to our promises</div>
+            </div>
+
+            <div className="orange-pills">
+              <div className="pill">
+                <div className="pill-title">BE SAFE</div>
+                <div className="pill-sub">Always with safety at our heart</div>
+              </div>
+              <div className="pill">
+                <div className="pill-title">BE CHALLENGING</div>
+                <div className="pill-sub">Always challenging cost</div>
+              </div>
+              <div className="pill">
+                <div className="pill-title">BE BOLD</div>
+                <div className="pill-sub">Making a positive difference</div>
+              </div>
+              <div className="pill">
+                <div className="pill-title">BE WELCOMING</div>
+                <div className="pill-sub">Always warm and welcoming</div>
+              </div>
+            </div>
+          </section>
+        </main>
+      ) : (
+        <main className="quiz-wrap" role="main">
+          <section className="quiz-head">
+            <h2>Quiz Mode</h2>
+            <p>
+              Select the real easyJet phrase from each dropdown. Instant
+              feedback will confirm your choices. Once in Quiz Mode, you can’t
+              return to View Mode.
+            </p>
+          </section>
+
+          {["Purpose", "Destination", "Priorities", "BE ORANGE"].map((group) => (
+            <section key={group} className="quiz-group">
+              <div className="quiz-group-head">
+                <span className="chip">{group}</span>
+                <h3>{group}</h3>
+              </div>
+
+              {quizItems
+                .filter((q) => q.group === group)
+                .map((q) => {
+                  const st = status[q.id];
+                  const val = answers[q.id] ?? "";
+                  const ok = st === "correct";
+                  const no = st === "wrong";
+
+                  return (
+                    <div
+                      id={`row-${q.id}`}
+                      key={q.id}
+                      className={`quiz-row ${ok ? "ok" : no ? "no" : ""}`}
+                    >
+                      <label htmlFor={`sel-${q.id}`}>{q.prompt}</label>
+
+                      <div className="select-wrap">
+                        <select
+                          id={`sel-${q.id}`}
+                          className={`ej-select ${ok ? "is-correct" : no ? "is-wrong" : ""}`}
+                          value={val}
+                          onChange={(e) => handleSelect(q.id, e.target.value, q.correct)}
+                        >
+                          <option value="" disabled>
+                            Select the correct phrase…
+                          </option>
+                          {q.options.map((opt, i) => (
+                            <option key={i} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+
+                        {ok && <span className="mark ok-mark">✅</span>}
+                        {no && <span className="mark no-mark">❌</span>}
+                      </div>
+                    </div>
+                  );
+                })}
             </section>
-          </main>
-        )}
-      </div>
+          ))}
+        </main>
+      )}
 
       <footer className="ej-footer">
-        <div className="ej-foot-left">
-          <span className="ej-kicker">easyJet</span>
-          <span className="ej-divider" />
-          <span className="ej-kicker">Spirit</span>
-        </div>
-        <div className="ej-foot-right">
-          <span className="ej-pill">Premium Training UI</span>
-        </div>
+        <span>easyJet • Spirit</span>
+        <span className="foot-pill">Internal training UI</span>
       </footer>
     </div>
   );
