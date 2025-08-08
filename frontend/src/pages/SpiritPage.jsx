@@ -22,9 +22,9 @@ export default function SpiritPage() {
       <div className="spirit-top">
         {/* PURPOSE + orange chevron */}
         <div className="purpose">
-          <svg className="chevron" viewBox="0 0 320 380" preserveAspectRatio="none" aria-hidden="true">
-            {/* left edge + large chevron that pierces the footer */}
-            <polygon points="0,0 220,190 0,380" fill="#ff6600" />
+          <svg className="chevron" viewBox="0 0 340 360" preserveAspectRatio="none" aria-hidden="true">
+            {/* tuned chevron */}
+            <polygon points="0,0 260,180 0,360" fill="#ff6600" />
           </svg>
 
           <div className="purpose-text" aria-labelledby="purpose-title">
@@ -39,10 +39,10 @@ export default function SpiritPage() {
 
         {/* PRIORITIES */}
         <div className="priorities">
-          <h2 className="section-title">PRIORITIES</h2>
+          <h2 className="section-title main">PRIORITIES</h2>
 
           <ul className="priority-list">
-            {priorities.map((t, i) => (
+            {priorities.map((t) => (
               <li key={t} className="priority-row">
                 <span className="dot" aria-hidden="true" />
                 <span className="dotted" aria-hidden="true" />
@@ -62,7 +62,7 @@ export default function SpiritPage() {
 
         {/* DESTINATION */}
         <div className="destination">
-          <h2 className="section-title">DESTINATION</h2>
+          <h2 className="section-title main">DESTINATION</h2>
           <div className="dest-bubble" role="figure" aria-label="Destination statement">
             Europe’s most loved airline —
             <br />
