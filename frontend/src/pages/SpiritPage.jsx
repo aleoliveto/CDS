@@ -8,6 +8,7 @@ import "../SpiritPage.css";
  * - Priorities rows -> select
  * - Purpose body -> select
  * - BE ORANGE subtitles -> select
+ * - BE ORANGE center pill (“Living the Orange Spirit”) -> select
  * - Destination circle stays static (read-only)
  * Lock: once in Quiz Mode, cannot go back
  * Feedback: ✅ fade green / ❌ shake red on each field
@@ -17,7 +18,10 @@ const DATA = {
   purpose: {
     label: "Purpose",
     correct: "Making low-cost travel easy",
-    distractors: ["Seamlessly connecting Europe with warmest welcome in the sky", "Making every seat free"],
+    distractors: [
+      "Seamlessly connecting Europe with warmest welcome in the sky",
+      "Making every seat free",
+    ],
   },
   destination:
     "Europe’s most loved airline — winning for our customers, shareholders and people.",
@@ -34,7 +38,11 @@ const DATA = {
     {
       id: "p2",
       correct: "Transforming revenue",
-      distractors: ["Maintaining a sharp focus on cost efficiency","Expanding customer loyalty","Transforming profits"],
+      distractors: [
+        "Maintaining a sharp focus on cost efficiency",
+        "Expanding customer loyalty",
+        "Transforming profits",
+      ],
     },
     {
       id: "p3",
@@ -42,7 +50,7 @@ const DATA = {
       distractors: [
         "Delivering efficient and easy travel",
         "Always safe and reliable",
-        "",
+        "Offering the lowest fares always",
       ],
     },
     {
@@ -66,10 +74,7 @@ const DATA = {
       id: "bo-challenging",
       title: "BE CHALLENGING",
       correct: "Always challenging cost",
-      distractors: [
-        "Always reducing ticket prices to zero",
-        "On our customers' side",
-      ],
+      distractors: ["Always reducing ticket prices to zero", "On our customers' side"],
     },
     {
       id: "bo-bold",
@@ -84,6 +89,13 @@ const DATA = {
       distractors: ["Always distant and cold", "Always efficient"],
     },
   ],
+};
+
+// BE ORANGE center pill (“Living the Orange Spirit”)
+const ORANGE_CENTER = {
+  id: "bo-center",
+  correct: "Living the Orange Spirit",
+  distractors: ["Living the Green Spirit", "Embracing the Blue Vision"],
 };
 
 // tiny plane icon
@@ -128,6 +140,13 @@ export default function SpiritPage() {
     DATA.beOrange.forEach((tile) => {
       o[tile.id] = shuffle([tile.correct, ...tile.distractors]);
     });
+
+    // center pill options
+    o[ORANGE_CENTER.id] = shuffle([
+      ORANGE_CENTER.correct,
+      ...ORANGE_CENTER.distractors,
+    ]);
+
     return o;
   }, []);
 
@@ -300,8 +319,52 @@ export default function SpiritPage() {
             <div className="band-col">Being true to our promises</div>
           </div>
 
-          {/* Center box present in your board */}
-          <div className="orange-center-box">Living the Orange Spirit</div>
+          {/* Center pill under BE ORANGE */}
+          <div
+            id={`row-${ORANGE_CENTER.id}`}
+            className={`orange-center-box ${quizMode ? status[ORANGE_CENTER.id] || "" : ""}`}
+          >
+            <div className="orange-center-card">
+              {!quizMode ? (
+                <div className="orange-center-sub">{ORANGE_CENTER.correct}</div>
+              ) : (
+                <div className="pill-select">
+                  <select
+                    className={`ej-select ${
+                      status[ORANGE_CENTER.id] === "correct"
+                        ? "is-correct"
+                        : status[ORANGE_CENTER.id] === "wrong"
+                        ? "is-wrong"
+                        : ""
+                    }`}
+                    value={answers[ORANGE_CENTER.id] || ""}
+                    onChange={(e) =>
+                      onSelect(
+                        ORANGE_CENTER.id,
+                        e.target.value,
+                        ORANGE_CENTER.correct
+                      )
+                    }
+                  >
+                    <option value="" disabled>
+                      Select the correct phrase…
+                    </option>
+                    {options[ORANGE_CENTER.id].map((v, i) => (
+                      <option key={i} value={v}>
+                        {v}
+                      </option>
+                    ))}
+                  </select>
+                  {status[ORANGE_CENTER.id] === "correct" && (
+                    <span className="mark ok-mark">✅</span>
+                  )}
+                  {status[ORANGE_CENTER.id] === "wrong" && (
+                    <span className="mark no-mark">❌</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
 
           <div className="orange-pills">
             {DATA.beOrange.map((tile) => {
