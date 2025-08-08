@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./SpiritPage.css";
+import "../SpiritPage.css";
 
 export default function SpiritPage() {
   const [quizMode, setQuizMode] = useState(false);
