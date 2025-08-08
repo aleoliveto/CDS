@@ -1,126 +1,139 @@
+/* Global Container */
 .spirit-container {
-  background: #fff;
-  border: 10px solid #ff6600;
-  padding: 20px;
-  font-family: "Segoe UI", sans-serif;
-  max-width: 1300px;
+  font-family: 'Segoe UI', sans-serif;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 1.5rem;
+  border: 8px solid #ff6600;
+  background-color: white;
+  box-sizing: border-box;
 }
 
-.mode-btn {
-  background: #ff6600;
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  margin-bottom: 20px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.spirit-layout {
+/* Header */
+.spirit-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-/* Purpose Section */
-.purpose-section {
-  flex: 1 1 250px;
-  background: #ff6600;
-  color: white;
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  clip-path: polygon(0 0, 90% 0, 100% 100%, 0% 100%);
-  min-height: 250px;
-}
-
-.purpose-content h3 {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-
-.purpose-content p {
-  font-size: 1.1rem;
-  line-height: 1.4;
-}
-
-/* Priorities Section */
-.priorities-section {
-  flex: 2 1 400px;
-  text-align: center;
-}
-
-.priorities-list {
-  display: grid;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.priority-card {
-  background: #f2f2f2;
-  border: 2px solid #ff6600;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-.priority-card select {
-  width: 100%;
-  padding: 6px;
-  border: 1px solid #ccc;
-}
-
-/* Destination Section */
-.destination-section {
-  flex: 1 1 250px;
-  text-align: center;
-}
-
-.destination-circle {
-  background: #ff6600;
+  background: linear-gradient(90deg, #ff6600, #ff8533);
   color: white;
-  border-radius: 50%;
-  width: 220px;
-  height: 220px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-  font-weight: bold;
-  font-size: 1rem;
-  line-height: 1.4;
-}
-
-/* BE ORANGE Section */
-.be-orange-section {
-  margin-top: 30px;
-}
-
-.be-orange-values {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.value-card {
-  flex: 1 1 200px;
-  background: #f2f2f2;
-  border: 2px solid #ff6600;
-  padding: 10px;
+  padding: 1rem 1.5rem;
   border-radius: 6px;
 }
-
-.value-card label {
-  display: block;
+.spirit-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+.quiz-toggle {
+  background: white;
   color: #ff6600;
+  border: 2px solid white;
+  padding: 0.5rem 1rem;
   font-weight: bold;
-  margin-bottom: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.quiz-toggle:disabled {
+  background: #ffe6cc;
+  color: #ff6600;
+  cursor: not-allowed;
 }
 
-.value-card select {
+/* Purpose Card */
+.purpose-card {
+  margin-top: 1.5rem;
+  background-color: #f5f5f5;
+  padding: 1.5rem;
+  border-left: 6px solid #ff6600;
+  border-radius: 4px;
+}
+.purpose-card h2 {
+  color: #ff6600;
+  margin-bottom: 0.5rem;
+}
+
+/* Priorities */
+.priorities-section {
+  margin-top: 2rem;
+}
+.priorities-section h2 {
+  color: #ff6600;
+  margin-bottom: 1rem;
+}
+.priorities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.priority-card {
+  background: #fff7f0;
+  border: 2px solid #ff6600;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}
+.priority-card p {
+  margin: 0;
+  color: #1d1d1d;
+  font-weight: normal;
+}
+
+/* Destination Banner */
+.destination-banner {
+  background-color: #ff6600;
+  color: white;
+  padding: 2rem;
+  margin-top: 2rem;
+  border-radius: 4px;
+  text-align: center;
+}
+.destination-banner h2 {
+  margin-bottom: 0.5rem;
+}
+
+/* BE ORANGE */
+.be-orange-section {
+  margin-top: 2rem;
+}
+.be-orange-section h2 {
+  color: #ff6600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.be-orange-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.be-orange-card {
+  background: #fff7f0;
+  border: 2px solid #ff6600;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}
+.be-orange-card h3 {
+  margin-bottom: 0.5rem;
+  color: #ff6600;
+}
+.be-orange-card p {
+  margin: 0;
+  font-weight: normal;
+}
+
+/* Quiz Select */
+.quiz-select {
   width: 100%;
-  padding: 6px;
-  border: 1px solid #ccc;
+  padding: 0.5rem;
+  border: 2px solid #ff6600;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+/* Footer */
+.spirit-footer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
 }
