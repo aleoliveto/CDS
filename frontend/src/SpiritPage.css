@@ -189,3 +189,41 @@
 @media (max-width:560px){
   .value-grid{ grid-template-columns:1fr; }
 }
+/* --- FINAL PIXEL NUDGES (safe overrides) --- */
+
+/* Purpose copy sits a touch lower in the chevron */
+.purpose-text { top: 110px; }
+
+/* Add a tiny blank before the dotted rail starts */
+.priority-row .dotted-line { margin-left: 6px; }
+
+/* Destination bubble: slightly smaller and a hair higher */
+.destination-circle {
+  width: 258px;
+  height: 258px;
+  margin-top: 8px;
+}
+
+/* BE ORANGE cap height closer to reference */
+.footer-header h2 { font-size: 40px; }
+
+/* Pill: a little lighter fill, same border, tighter contrast */
+.orange-core {
+  background: #efefef;     /* lighter than before */
+  color: #7a7a7a !important;
+  padding: 9px 16px;        /* subtle vertical trim */
+}
+
+/* Plane badge sits half a pixel closer to the rail */
+.plane-icon { margin-left: -2.5px; }
+
+/* Slightly thinner dot dash rhythm on the rails */
+.dotted-line::before {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--orange) 0px,
+    var(--orange) 2.5px,
+    transparent 2.5px,
+    transparent 10px
+  );
+}
