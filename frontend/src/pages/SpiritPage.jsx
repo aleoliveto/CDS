@@ -1,363 +1,214 @@
-import React, { useMemo, useState, useEffect } from "react";
-import "../SpiritPage.css";
-
-/**
- * easyJet SpiritPage — Board layout with inline dropdown quiz
- * View Mode: static board
- * Quiz Mode: same layout, phrases become dropdowns in-place
- * - Priorities rows -> select
- * - Purpose body -> select
- * - BE ORANGE subtitles -> select
- * - Destination circle stays static (read-only)
- * Lock: once in Quiz Mode, cannot go back
- * Feedback: ✅ fade green / ❌ shake red on each field
- */
-
-const DATA = {
-  purpose: {
-    label: "Purpose",
-    correct: "Making low-cost travel easy",
-    distractors: ["Making high-cost travel luxurious", "Making every seat free"],
-  },
-  destination:
-    "Europe’s most loved airline — winning for our customers, shareholders and people.",
-  priorities: [
-    {
-      id: "p1",
-      correct: "Building Europe’s best network",
-      distractors: [
-        "Becoming the world’s biggest carrier",
-        "Connecting every country in the world",
-      ],
-    },
-    {
-      id: "p2",
-      correct: "Transforming revenue",
-      distractors: ["Maximising flight occupancy", "Expanding customer loyalty"],
-    },
-    {
-      id: "p3",
-      correct: "Delivering ease and reliability",
-      distractors: [
-        "Improving cabin seating",
-        "Offering the lowest fares always",
-      ],
-    },
-    {
-      id: "p4",
-      correct: "Driving our low-cost model",
-      distractors: [
-        "Cutting all customer amenities",
-        "Reducing aircraft maintenance",
-      ],
-    },
-  ],
-  beOrange: [
-    {
-      id: "bo-safe",
-      title: "BE SAFE",
-      correct: "Always with safety at our heart",
-      distractors: ["Safety is optional", "Safety only for long flights"],
-    },
-    {
-      id: "bo-challenging",
-      title: "BE CHALLENGING",
-      correct: "Always challenging cost",
-      distractors: [
-        "Always reducing ticket prices to zero",
-        "Always ignoring costs",
-      ],
-    },
-    {
-      id: "bo-bold",
-      title: "BE BOLD",
-      correct: "Making a positive difference",
-      distractors: ["Making a neutral impact", "Making a negative difference"],
-    },
-    {
-      id: "bo-welcoming",
-      title: "BE WELCOMING",
-      correct: "Always warm and welcoming",
-      distractors: ["Always distant and cold", "Always neutral and reserved"],
-    },
-  ],
-};
-
-// tiny plane icon
-const Plane = () => (
-  <svg className="plane-ic" viewBox="0 0 24 24" aria-hidden>
-    <path
-      d="M2 13l8 0 4 7 2-1-2-6 5 0 2 3 2-1-2-3 2-3-2-1-2 3-5 0 2-6-2-1-4 7-8 0z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-// shuffle util
-function shuffle(a) {
-  const arr = a.slice();
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
+import React, { useState } from "react";
+import "./SpiritPage.css";
 
 export default function SpiritPage() {
   const [quizMode, setQuizMode] = useState(false);
-  const [locked, setLocked] = useState(false);
 
-  // answers and status per id
-  const [answers, setAnswers] = useState({});
-  const [status, setStatus] = useState({}); // {id: 'correct'|'wrong'}
+  const toggleQuizMode = () => {
+    if (!quizMode) setQuizMode(true);
+  };
 
-  // build options once
-  const options = useMemo(() => {
-    const o = {};
-    o.purpose = shuffle([DATA.purpose.correct, ...DATA.purpose.distractors]);
+  const priorities = [
+    {
+      title: "Building Europe’s best network",
+      correct: "Building Europe’s best network",
+      options: [
+        "Becoming the world’s biggest carrier",
+        "Connecting every country in the world",
+        "Building Europe’s best network"
+      ]
+    },
+    {
+      title: "Transforming revenue",
+      correct: "Transforming revenue",
+      options: [
+        "Maximising flight occupancy",
+        "Expanding customer loyalty",
+        "Transforming revenue"
+      ]
+    },
+    {
+      title: "Delivering ease and reliability",
+      correct: "Delivering ease and reliability",
+      options: [
+        "Improving cabin seating",
+        "Offering the lowest fares always",
+        "Delivering ease and reliability"
+      ]
+    },
+    {
+      title: "Driving our low-cost model",
+      correct: "Driving our low-cost model",
+      options: [
+        "Cutting all customer amenities",
+        "Reducing aircraft maintenance",
+        "Driving our low-cost model"
+      ]
+    }
+  ];
 
-    DATA.priorities.forEach((row) => {
-      o[row.id] = shuffle([row.correct, ...row.distractors]);
-    });
-    DATA.beOrange.forEach((tile) => {
-      o[tile.id] = shuffle([tile.correct, ...tile.distractors]);
-    });
-    return o;
-  }, []);
+  const beOrange = [
+    {
+      title: "BE SAFE",
+      correct: "Always with safety at our heart",
+      options: [
+        "Safety is optional",
+        "Safety only for long flights",
+        "Always with safety at our heart"
+      ]
+    },
+    {
+      title: "BE CHALLENGING",
+      correct: "Always challenging cost",
+      options: [
+        "Always reducing ticket prices to zero",
+        "Always ignoring costs",
+        "Always challenging cost"
+      ]
+    },
+    {
+      title: "BE BOLD",
+      correct: "Making a positive difference",
+      options: [
+        "Making a neutral impact",
+        "Making a negative difference",
+        "Making a positive difference"
+      ]
+    },
+    {
+      title: "BE WELCOMING",
+      correct: "Always warm and welcoming",
+      options: [
+        "Always distant and cold",
+        "Always neutral and reserved",
+        "Always warm and welcoming"
+      ]
+    }
+  ];
 
-  useEffect(() => {
-    if (quizMode) setLocked(true);
-  }, [quizMode]);
-
-  const mark = (id, ok) => {
-    setStatus((s) => ({ ...s, [id]: ok ? "correct" : "wrong" }));
-    if (!ok) {
-      const el = document.getElementById(`row-${id}`);
-      if (el) {
-        el.classList.remove("shake-now");
-        // reflow
-        // eslint-disable-next-line no-unused-expressions
-        el.offsetHeight;
-        el.classList.add("shake-now");
-        setTimeout(() => el.classList.remove("shake-now"), 550);
-      }
+  const handleSelect = (e, correct) => {
+    if (e.target.value === correct) {
+      e.target.classList.add("correct");
+      e.target.classList.remove("incorrect");
+    } else {
+      e.target.classList.add("incorrect");
+      e.target.classList.remove("correct");
     }
   };
 
-  const onSelect = (id, value, correct) => {
-    setAnswers((a) => ({ ...a, [id]: value }));
-    mark(id, value === correct);
-  };
-
   return (
-    <div className="spirit-root">
-      <header className="ej-header">
-        <h1 className="ej-title">easyJet Spirit</h1>
-        <div className="ej-mode">
-          <span className={`mode-pill ${quizMode ? "active" : ""}`}>
-            {quizMode ? "Quiz Mode (locked)" : "View Mode"}
-          </span>
-          <button
-            className="ej-btn"
-            onClick={() => setQuizMode(true)}
-            disabled={locked}
-            aria-disabled={locked}
-          >
-            {locked ? "Quiz Mode" : "Start Quiz"}
-          </button>
-        </div>
+    <div className="spirit-page">
+      <header>
+        <h1>easyJet Spirit</h1>
+        <button
+          className={quizMode ? "quiz-btn-locked" : "quiz-btn"}
+          onClick={toggleQuizMode}
+        >
+          {quizMode ? "Quiz Mode (locked)" : "Start Quiz"}
+        </button>
       </header>
 
-      <main className="board-wrap" role="main">
-        {/* head line */}
-        <div className="board-head">
-          <div className="board-head-left">PRIORITIES</div>
-          <div className="board-head-right">DESTINATION</div>
+      <div className="spirit-card">
+        <h2 className="section-title">PRIORITIES</h2>
+        <h2 className="section-title right">DESTINATION</h2>
+
+        <div className="purpose-box">
+          <h3>PURPOSE</h3>
+          {!quizMode ? (
+            <p>Making low-cost travel easy</p>
+          ) : (
+            <select onChange={(e) => handleSelect(e, "Making low-cost travel easy")}>
+              <option>Select the correct phrase..</option>
+              <option>Making low-cost travel easy</option>
+              <option>Making high-cost travel luxurious</option>
+              <option>Making every seat free</option>
+            </select>
+          )}
         </div>
 
-        {/* core: purpose chevron + priorities + destination */}
-        <section className="board-core">
-          {/* PURPOSE */}
-          <aside className={`purpose ${quizMode && status.purpose}`}>
-            <div className="purpose-inner">
-              <div className="purpose-title">PURPOSE</div>
+        <div className="destination-circle">
+          {!quizMode ? (
+            <p>
+              Europe’s most loved airline — winning for our customers, shareholders
+              and people.
+            </p>
+          ) : (
+            <select
+              onChange={(e) =>
+                handleSelect(
+                  e,
+                  "Europe’s most loved airline — winning for our customers, shareholders and people."
+                )
+              }
+            >
+              <option>Select the correct phrase..</option>
+              <option>
+                Europe’s most loved airline — winning for our customers, shareholders
+                and people.
+              </option>
+              <option>Becoming the world’s most luxurious airline</option>
+              <option>Connecting every continent</option>
+            </select>
+          )}
+        </div>
 
+        <div className="priority-list">
+          {priorities.map((item, idx) => (
+            <div key={idx} className="priority-item">
               {!quizMode ? (
-                <div className="purpose-body">
-                  <div>Making</div>
-                  <div>low-cost</div>
-                  <div>travel easy</div>
-                </div>
+                <span>{item.title}</span>
               ) : (
-                <div id="row-purpose" className="purpose-select-wrap">
-                  <select
-                    className={`ej-select ${
-                      status.purpose === "correct"
-                        ? "is-correct"
-                        : status.purpose === "wrong"
-                        ? "is-wrong"
-                        : ""
-                    }`}
-                    value={answers.purpose || ""}
-                    onChange={(e) =>
-                      onSelect("purpose", e.target.value, DATA.purpose.correct)
-                    }
-                  >
-                    <option value="" disabled>
-                      Select the correct phrase…
-                    </option>
-                    {options.purpose.map((v, i) => (
-                      <option key={i} value={v}>
-                        {v}
-                      </option>
-                    ))}
-                  </select>
-                  {status.purpose === "correct" && (
-                    <span className="mark ok-mark">✅</span>
-                  )}
-                  {status.purpose === "wrong" && (
-                    <span className="mark no-mark">❌</span>
-                  )}
-                </div>
+                <select onChange={(e) => handleSelect(e, item.correct)}>
+                  <option>Select the correct phrase..</option>
+                  {item.options.sort(() => Math.random() - 0.5).map((opt, i) => (
+                    <option key={i}>{opt}</option>
+                  ))}
+                </select>
               )}
             </div>
-            <div className="purpose-chevron" aria-hidden />
-          </aside>
+          ))}
+        </div>
+      </div>
 
-          {/* PRIORITIES */}
-          <div className="prio-list">
-            {DATA.priorities.map((row) => {
-              const st = status[row.id];
-              const val = answers[row.id] || "";
-              return (
-                <div
-                  id={`row-${row.id}`}
-                  key={row.id}
-                  className={`prio-row ${quizMode ? st || "" : ""}`}
-                >
-                  <div className="prio-dot" />
-                  <div className="prio-leader">
-                    <Plane />
-                    {!quizMode ? (
-                      <span className="prio-text">{row.correct}</span>
-                    ) : (
-                      <div className="prio-select">
-                        <select
-                          className={`ej-select ${
-                            st === "correct"
-                              ? "is-correct"
-                              : st === "wrong"
-                              ? "is-wrong"
-                              : ""
-                          }`}
-                          value={val}
-                          onChange={(e) =>
-                            onSelect(row.id, e.target.value, row.correct)
-                          }
-                        >
-                          <option value="" disabled>
-                            Select the correct phrase…
-                          </option>
-                          {options[row.id].map((v, i) => (
-                            <option key={i} value={v}>
-                              {v}
-                            </option>
-                          ))}
-                        </select>
-                        {st === "correct" && (
-                          <span className="mark ok-mark">✅</span>
-                        )}
-                        {st === "wrong" && (
-                          <span className="mark no-mark">❌</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+      <section className="orange-band">
+        <div className="orange-band-top">
+          <div className="band-col">Made possible by our people</div>
+          <div className="band-center">BE ORANGE</div>
+          <div className="band-col">Being true to our promises</div>
+          <div className="orange-center-box">
+            {!quizMode ? (
+              <span>Living the Orange Spirit</span>
+            ) : (
+              <select
+                onChange={(e) => handleSelect(e, "Living the Orange Spirit")}
+              >
+                <option>Select the correct phrase..</option>
+                <option>Living the Orange Spirit</option>
+                <option>Living the Green Spirit</option>
+                <option>Embracing the Blue Vision</option>
+              </select>
+            )}
           </div>
+        </div>
 
-          {/* DESTINATION circle (read-only) */}
-          <aside className="destination">
-            <div className="dest-circle">
-              <div className="dest-text">{DATA.destination}</div>
+        <div className="orange-pills">
+          {beOrange.map((item, idx) => (
+            <div key={idx} className="pill">
+              <h3>{item.title}</h3>
+              {!quizMode ? (
+                <span>{item.correct}</span>
+              ) : (
+                <select onChange={(e) => handleSelect(e, item.correct)}>
+                  <option>Select the correct phrase..</option>
+                  {item.options.sort(() => Math.random() - 0.5).map((opt, i) => (
+                    <option key={i}>{opt}</option>
+                  ))}
+                </select>
+              )}
             </div>
-          </aside>
-        </section>
-
-        {/* BE ORANGE BAND */}
-        <section className="orange-band">
-          <div className="orange-band-top">
-            <div className="band-col">Made possible by our people</div>
-            <div className="band-center">BE ORANGE</div>
-            <div className="band-col">Being true to our promises</div>
-          </div>
-
-          {/* Center box present in your board */}
-          <div className="orange-center-box">Living the Orange Spirit</div>
-
-          <div className="orange-pills">
-            {DATA.beOrange.map((tile) => {
-              const st = status[tile.id];
-              const val = answers[tile.id] || "";
-
-              return (
-                <div
-                  id={`row-${tile.id}`}
-                  key={tile.id}
-                  className={`pill ${quizMode ? st || "" : ""}`}
-                >
-                  <div className="pill-title">{tile.title}</div>
-
-                  {!quizMode ? (
-                    <div className="pill-sub">{tile.correct}</div>
-                  ) : (
-                    <div className="pill-select">
-                      <select
-                        className={`ej-select ${
-                          st === "correct"
-                            ? "is-correct"
-                            : st === "wrong"
-                            ? "is-wrong"
-                            : ""
-                        }`}
-                        value={val}
-                        onChange={(e) =>
-                          onSelect(tile.id, e.target.value, tile.correct)
-                        }
-                      >
-                        <option value="" disabled>
-                          Select the correct phrase…
-                        </option>
-                        {options[tile.id].map((v, i) => (
-                          <option key={i} value={v}>
-                            {v}
-                          </option>
-                        ))}
-                      </select>
-                      {st === "correct" && (
-                        <span className="mark ok-mark">✅</span>
-                      )}
-                      {st === "wrong" && (
-                        <span className="mark no-mark">❌</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      </main>
-
-      <footer className="ej-footer">
-        <span>easyJet • Spirit</span>
-        <span className="foot-pill">Internal training UI</span>
-      </footer>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
