@@ -3,15 +3,8 @@ import "../SpiritPage.css";
 
 /**
  * easyJet SpiritPage — Board layout with inline dropdown quiz
- * View Mode: static board
- * Quiz Mode: same layout, phrases become dropdowns in-place
- * - Priorities rows -> select
- * - Purpose body -> select
- * - BE ORANGE subtitles -> select
- * - BE ORANGE center pill (“Living the Orange Spirit”) -> select
- * - Destination circle stays static (read-only)
- * Lock: once in Quiz Mode, cannot go back
- * Feedback: ✅ fade green / ❌ shake red on each field
+ * - Same layout in View & Quiz
+ * - Center of BE ORANGE band is now a white tile with "BE ORANGE" title + subtitle/dropdown
  */
 
 const DATA = {
@@ -91,9 +84,10 @@ const DATA = {
   ],
 };
 
-// BE ORANGE center pill (“Living the Orange Spirit”)
+// BE ORANGE center tile (“Living the Orange Spirit”)
 const ORANGE_CENTER = {
   id: "bo-center",
+  title: "BE ORANGE",
   correct: "Living the Orange Spirit",
   distractors: ["Living the Green Spirit", "Embracing the Blue Vision"],
 };
@@ -125,28 +119,23 @@ export default function SpiritPage() {
   const [quizMode, setQuizMode] = useState(false);
   const [locked, setLocked] = useState(false);
 
-  // answers and status per id
   const [answers, setAnswers] = useState({});
   const [status, setStatus] = useState({}); // {id: 'correct'|'wrong'}
 
-  // build options once
   const options = useMemo(() => {
     const o = {};
     o.purpose = shuffle([DATA.purpose.correct, ...DATA.purpose.distractors]);
-
     DATA.priorities.forEach((row) => {
       o[row.id] = shuffle([row.correct, ...row.distractors]);
     });
     DATA.beOrange.forEach((tile) => {
       o[tile.id] = shuffle([tile.correct, ...tile.distractors]);
     });
-
-    // center pill options
+    // center tile options
     o[ORANGE_CENTER.id] = shuffle([
       ORANGE_CENTER.correct,
       ...ORANGE_CENTER.distractors,
     ]);
-
     return o;
   }, []);
 
@@ -160,7 +149,7 @@ export default function SpiritPage() {
       const el = document.getElementById(`row-${id}`);
       if (el) {
         el.classList.remove("shake-now");
-        // reflow
+        // force reflow
         // eslint-disable-next-line no-unused-expressions
         el.offsetHeight;
         el.classList.add("shake-now");
@@ -315,18 +304,15 @@ export default function SpiritPage() {
         <section className="orange-band">
           <div className="orange-band-top">
             <div className="band-col">Made possible by our people</div>
-            <div className="band-center">BE ORANGE</div>
-            <div className="band-col">Being true to our promises</div>
-          </div>
 
-          {/* Center pill under BE ORANGE */}
-          <div
-            id={`row-${ORANGE_CENTER.id}`}
-            className={`orange-center-box ${quizMode ? status[ORANGE_CENTER.id] || "" : ""}`}
-          >
-            <div className="orange-center-card">
+            {/* Center tile INSIDE the band */}
+            <div
+              id={`row-${ORANGE_CENTER.id}`}
+              className={`pill orange-center-pill ${quizMode ? status[ORANGE_CENTER.id] || "" : ""}`}
+            >
+              <div className="pill-title">BE ORANGE</div>
               {!quizMode ? (
-                <div className="orange-center-sub">{ORANGE_CENTER.correct}</div>
+                <div className="pill-sub">{ORANGE_CENTER.correct}</div>
               ) : (
                 <div className="pill-select">
                   <select
@@ -364,6 +350,8 @@ export default function SpiritPage() {
                 </div>
               )}
             </div>
+
+            <div className="band-col">Being true to our promises</div>
           </div>
 
           <div className="orange-pills">
