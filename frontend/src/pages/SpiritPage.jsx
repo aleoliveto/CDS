@@ -1,5 +1,5 @@
 import React from "react";
-import "../SpiritPage.css";
+import "./SpiritPage.css";
 
 export default function SpiritPage() {
   const priorities = [
@@ -18,7 +18,7 @@ export default function SpiritPage() {
 
   return (
     <section className="spirit-container" aria-label="easyJet Orange Spirit">
-      {/* ========== TOP (white) ========== */}
+      {/* ===== TOP (white) ===== */}
       <div className="spirit-header">
         {/* LEFT: PURPOSE chevron */}
         <div className="spirit-left">
@@ -28,7 +28,6 @@ export default function SpiritPage() {
             preserveAspectRatio="none"
             aria-hidden="true"
           >
-            {/* right-pointing chevron that meets the grey bar */}
             <polygon points="0,0 250,180 0,360" fill="#ff6600" />
           </svg>
 
@@ -78,7 +77,7 @@ export default function SpiritPage() {
         </div>
       </div>
 
-      {/* ========== FOOTER (grey) ========== */}
+      {/* ===== FOOTER (grey) ===== */}
       <div className="spirit-footer">
         <div className="footer-header">
           <span>Made possible by our people</span>
