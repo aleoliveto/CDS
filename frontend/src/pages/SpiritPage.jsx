@@ -1,7 +1,7 @@
 import React from "react";
 import "../SpiritPage.css";
 
-export default function SpiritPageModern() {
+export default function SpiritPage() {
   const priorities = [
     {
       title: "Build Europe’s best network",
