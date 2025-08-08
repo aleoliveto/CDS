@@ -160,7 +160,7 @@ body, .spirit-root {
 .orange-center-pill {
   grid-column: 2;
   justify-self: center;
-  width: min(360px, 90%);
+  width: min(480px, 90%);
   /* inherit tile look */
   background: #fff;
   border: 2px solid #e1e3e7;
