@@ -2,20 +2,20 @@ import React, { useMemo, useState, useEffect } from "react";
 import "../SpiritPage.css";
 
 /**
- * easyJet Spirit — Board layout with inline dropdown quiz
- * - View Mode: static board (Purpose chevron, priorities w/ dotted leaders, Destination circle, BE ORANGE band + center box)
- * - Quiz Mode: same layout, phrases become dropdowns:
- *     • Purpose body
- *     • 4 Priorities rows
- *     • BE ORANGE center box “Living the Orange Spirit”
- *     • 4 BE ORANGE value subtitles
- *   (Destination circle stays read-only)
- * - One-way switch to Quiz Mode
- * - Feedback per field: ✅ fade green / ❌ shake red
+ * easyJet SpiritPage — Board layout with inline dropdown quiz
+ * View Mode: static board
+ * Quiz Mode: same layout, phrases become dropdowns in-place
+ * - Priorities rows -> select
+ * - Purpose body -> select
+ * - BE ORANGE subtitles -> select
+ * - Destination circle stays static (read-only)
+ * Lock: once in Quiz Mode, cannot go back
+ * Feedback: ✅ fade green / ❌ shake red on each field
  */
 
 const DATA = {
   purpose: {
+    label: "Purpose",
     correct: "Making low-cost travel easy",
     distractors: ["Making high-cost travel luxurious", "Making every seat free"],
   },
@@ -81,14 +81,9 @@ const DATA = {
       distractors: ["Always distant and cold", "Always neutral and reserved"],
     },
   ],
-  orangeCenter: {
-    id: "bo-center",
-    correct: "Living the Orange Spirit",
-    distractors: ["Living the Green Spirit", "Embracing the Blue Vision"],
-  },
 };
 
-// tiny plane icon for priorities
+// tiny plane icon
 const Plane = () => (
   <svg className="plane-ic" viewBox="0 0 24 24" aria-hidden>
     <path
@@ -101,7 +96,7 @@ const Plane = () => (
   </svg>
 );
 
-// utils
+// shuffle util
 function shuffle(a) {
   const arr = a.slice();
   for (let i = arr.length - 1; i > 0; i--) {
@@ -115,22 +110,20 @@ export default function SpiritPage() {
   const [quizMode, setQuizMode] = useState(false);
   const [locked, setLocked] = useState(false);
 
+  // answers and status per id
   const [answers, setAnswers] = useState({});
-  const [status, setStatus] = useState({}); // id -> 'correct'|'wrong'
+  const [status, setStatus] = useState({}); // {id: 'correct'|'wrong'}
 
-  // build randomized options once per mount
-  const opts = useMemo(() => {
+  // build options once
+  const options = useMemo(() => {
     const o = {};
     o.purpose = shuffle([DATA.purpose.correct, ...DATA.purpose.distractors]);
-    o[DATA.orangeCenter.id] = shuffle([
-      DATA.orangeCenter.correct,
-      ...DATA.orangeCenter.distractors,
-    ]);
-    DATA.priorities.forEach((r) => {
-      o[r.id] = shuffle([r.correct, ...r.distractors]);
+
+    DATA.priorities.forEach((row) => {
+      o[row.id] = shuffle([row.correct, ...row.distractors]);
     });
-    DATA.beOrange.forEach((t) => {
-      o[t.id] = shuffle([t.correct, ...t.distractors]);
+    DATA.beOrange.forEach((tile) => {
+      o[tile.id] = shuffle([tile.correct, ...tile.distractors]);
     });
     return o;
   }, []);
@@ -145,7 +138,7 @@ export default function SpiritPage() {
       const el = document.getElementById(`row-${id}`);
       if (el) {
         el.classList.remove("shake-now");
-        // force reflow
+        // reflow
         // eslint-disable-next-line no-unused-expressions
         el.offsetHeight;
         el.classList.add("shake-now");
@@ -154,9 +147,9 @@ export default function SpiritPage() {
     }
   };
 
-  const onSelect = (id, val, correct) => {
-    setAnswers((a) => ({ ...a, [id]: val }));
-    mark(id, val === correct);
+  const onSelect = (id, value, correct) => {
+    setAnswers((a) => ({ ...a, [id]: value }));
+    mark(id, value === correct);
   };
 
   return (
@@ -179,19 +172,16 @@ export default function SpiritPage() {
       </header>
 
       <main className="board-wrap" role="main">
-        {/* Head strip */}
+        {/* head line */}
         <div className="board-head">
           <div className="board-head-left">PRIORITIES</div>
           <div className="board-head-right">DESTINATION</div>
         </div>
 
-        {/* Core row */}
+        {/* core: purpose chevron + priorities + destination */}
         <section className="board-core">
-          {/* PURPOSE chevron/box */}
-          <aside
-            id="row-purpose"
-            className={`purpose ${quizMode ? status.purpose || "" : ""}`}
-          >
+          {/* PURPOSE */}
+          <aside className={`purpose ${quizMode && status.purpose}`}>
             <div className="purpose-inner">
               <div className="purpose-title">PURPOSE</div>
 
@@ -202,7 +192,7 @@ export default function SpiritPage() {
                   <div>travel easy</div>
                 </div>
               ) : (
-                <div className="purpose-select-wrap">
+                <div id="row-purpose" className="purpose-select-wrap">
                   <select
                     className={`ej-select ${
                       status.purpose === "correct"
@@ -219,7 +209,7 @@ export default function SpiritPage() {
                     <option value="" disabled>
                       Select the correct phrase…
                     </option>
-                    {opts.purpose.map((v, i) => (
+                    {options.purpose.map((v, i) => (
                       <option key={i} value={v}>
                         {v}
                       </option>
@@ -237,7 +227,7 @@ export default function SpiritPage() {
             <div className="purpose-chevron" aria-hidden />
           </aside>
 
-          {/* PRIORITIES with dotted leaders */}
+          {/* PRIORITIES */}
           <div className="prio-list">
             {DATA.priorities.map((row) => {
               const st = status[row.id];
@@ -271,7 +261,7 @@ export default function SpiritPage() {
                           <option value="" disabled>
                             Select the correct phrase…
                           </option>
-                          {opts[row.id].map((v, i) => (
+                          {options[row.id].map((v, i) => (
                             <option key={i} value={v}>
                               {v}
                             </option>
@@ -299,71 +289,30 @@ export default function SpiritPage() {
           </aside>
         </section>
 
-        {/* BE ORANGE band */}
+        {/* BE ORANGE BAND */}
         <section className="orange-band">
           <div className="orange-band-top">
             <div className="band-col">Made possible by our people</div>
             <div className="band-center">BE ORANGE</div>
             <div className="band-col">Being true to our promises</div>
-
-            {/* Centered box under BE ORANGE */}
-            <div
-              id={`row-${DATA.orangeCenter.id}`}
-              className={`orange-center-box ${quizMode ? status[DATA.orangeCenter.id] || "" : ""}`}
-            >
-              {!quizMode ? (
-                <span>Living the Orange Spirit</span>
-              ) : (
-                <>
-                  <select
-                    className={`ej-select ${
-                      status[DATA.orangeCenter.id] === "correct"
-                        ? "is-correct"
-                        : status[DATA.orangeCenter.id] === "wrong"
-                        ? "is-wrong"
-                        : ""
-                    }`}
-                    value={answers[DATA.orangeCenter.id] || ""}
-                    onChange={(e) =>
-                      onSelect(
-                        DATA.orangeCenter.id,
-                        e.target.value,
-                        DATA.orangeCenter.correct
-                      )
-                    }
-                  >
-                    <option value="" disabled>
-                      Select the correct phrase…
-                    </option>
-                    {opts[DATA.orangeCenter.id].map((v, i) => (
-                      <option key={i} value={v}>
-                        {v}
-                      </option>
-                    ))}
-                  </select>
-                  {status[DATA.orangeCenter.id] === "correct" && (
-                    <span className="mark ok-mark">✅</span>
-                  )}
-                  {status[DATA.orangeCenter.id] === "wrong" && (
-                    <span className="mark no-mark">❌</span>
-                  )}
-                </>
-              )}
-            </div>
           </div>
 
-          {/* Value tiles */}
+          {/* Center box present in your board */}
+          <div className="orange-center-box">Living the Orange Spirit</div>
+
           <div className="orange-pills">
             {DATA.beOrange.map((tile) => {
               const st = status[tile.id];
               const val = answers[tile.id] || "";
+
               return (
                 <div
                   id={`row-${tile.id}`}
                   key={tile.id}
                   className={`pill ${quizMode ? st || "" : ""}`}
                 >
-                  <h3 className="pill-title">{tile.title}</h3>
+                  <div className="pill-title">{tile.title}</div>
+
                   {!quizMode ? (
                     <div className="pill-sub">{tile.correct}</div>
                   ) : (
@@ -384,7 +333,7 @@ export default function SpiritPage() {
                         <option value="" disabled>
                           Select the correct phrase…
                         </option>
-                        {opts[tile.id].map((v, i) => (
+                        {options[tile.id].map((v, i) => (
                           <option key={i} value={v}>
                             {v}
                           </option>
