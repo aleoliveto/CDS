@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
-import "../SpiritPage.css";
+import "./SpiritPage.css";
 
 export default function SpiritPage() {
-  // ===== DATA =====
+  // ===== CONTENT =====
   const priorities = [
     "Building Europe’s best network",
     "Transforming revenue",
@@ -17,7 +17,7 @@ export default function SpiritPage() {
     { label: "BE WELCOMING", desc: "Always warm and welcoming" },
   ];
 
-  // Similar-but-different distractors for quiz selects
+  // ===== QUIZ DATA (options) =====
   const priorityOptions = [
     "Building Europe’s best network",
     "Transforming revenue",
@@ -29,49 +29,85 @@ export default function SpiritPage() {
     "Improving airport lounges",
   ];
 
+  const pillCorrect = "Living the Orange Spirit";
+  const pillOptions = [
+    "Living the Orange Spirit",
+    "Leading with the Orange Heart",
+    "Following the Orange Way",
+    "Keeping the Orange Promise",
+  ];
+
+  const valueDescOptions = [
+    "Always with safety at our heart",
+    "Always challenging cost",
+    "Making a positive difference",
+    "Always warm and welcoming",
+    "Delivering effortless service",
+    "Winning with reliability",
+  ];
+
   // ===== QUIZ STATE =====
-  const [quizMode, setQuizMode] = useState(false);
-  const [answers, setAnswers] = useState(["", "", "", ""]);
+  const [quizStarted, setQuizStarted] = useState(false); // lock-in
+  const [answers, setAnswers] = useState({
+    priorities: ["", "", "", ""], // 4
+    pill: "",                      // 1
+    values: ["", "", "", ""],      // 4 (descriptions)
+  });
   const [checked, setChecked] = useState(false);
+
+  const totalQuestions = 4 + 1 + 4;
 
   const score = useMemo(() => {
     if (!checked) return null;
     let s = 0;
+    // priorities
     priorities.forEach((p, i) => {
-      if (answers[i] === p) s++;
+      if (answers.priorities[i] === p) s++;
+    });
+    // pill
+    if (answers.pill === pillCorrect) s++;
+    // values (descriptions must match by index)
+    values.forEach((v, i) => {
+      if (answers.values[i] === v.desc) s++;
     });
     return s;
-  }, [checked, answers, priorities]);
+  }, [checked, answers, priorities, values]);
 
-  function updateAnswer(i, value) {
-    const next = answers.slice();
-    next[i] = value;
+  function updatePriority(i, v) {
+    const next = { ...answers, priorities: answers.priorities.slice() };
+    next.priorities[i] = v;
+    setAnswers(next);
+  }
+  function updatePill(v) {
+    setAnswers({ ...answers, pill: v });
+  }
+  function updateValueDesc(i, v) {
+    const next = { ...answers, values: answers.values.slice() };
+    next.values[i] = v;
     setAnswers(next);
   }
 
+  function startQuiz() {
+    setQuizStarted(true); // cannot go back
+  }
   function onCheck() {
     setChecked(true);
   }
-
   function onReset() {
-    setAnswers(["", "", "", ""]);
     setChecked(false);
+    setAnswers({ priorities: ["", "", "", ""], pill: "", values: ["", "", "", ""] });
   }
 
-  // ===== VIEW UI =====
+  // ===== UI =====
   return (
     <section className="spirit-container" aria-label="easyJet Orange Spirit">
-      {/* Top controls */}
+      {/* Toolbar (one-way) */}
       <div className="spirit-toolbar">
-        <button
-          type="button"
-          className="btn-toggle"
-          onClick={() => setQuizMode(v => !v)}
-          aria-pressed={quizMode}
-        >
-          {quizMode ? "Switch to View Mode" : "Switch to Quiz Mode"}
-        </button>
-        {quizMode && (
+        {!quizStarted ? (
+          <button type="button" className="btn-toggle" onClick={startQuiz}>
+            Start Quiz
+          </button>
+        ) : (
           <div className="quiz-legend" aria-hidden="true">
             <span className="pill correct">Correct</span>
             <span className="pill wrong">Wrong</span>
@@ -103,11 +139,11 @@ export default function SpiritPage() {
           </div>
         </div>
 
-        {/* MIDDLE: PRIORITIES (view or quiz) */}
+        {/* MIDDLE: PRIORITIES */}
         <div className="spirit-priorities">
           <h2 className="section-title">PRIORITIES</h2>
 
-          {!quizMode ? (
+          {!quizStarted ? (
             <ul className="priority-list">
               {priorities.map((text) => (
                 <li key={text} className="priority-row">
@@ -128,10 +164,11 @@ export default function SpiritPage() {
           ) : (
             <ul className="priority-list">
               {priorities.map((correct, i) => {
+                const a = answers.priorities[i];
                 const state =
-                  !checked || answers[i] === ""
+                  !checked || a === ""
                     ? "neutral"
-                    : answers[i] === correct
+                    : a === correct
                     ? "correct"
                     : "wrong";
                 return (
@@ -147,15 +184,14 @@ export default function SpiritPage() {
                       />
                     </span>
 
-                    {/* iPad-friendly select (no libs) */}
                     <label className="sr-only" htmlFor={`priority-${i}`}>
                       Priority {i + 1}
                     </label>
                     <select
                       id={`priority-${i}`}
                       className="priority-select"
-                      value={answers[i]}
-                      onChange={(e) => updateAnswer(i, e.target.value)}
+                      value={answers.priorities[i]}
+                      onChange={(e) => updatePriority(i, e.target.value)}
                     >
                       <option value="">Select the correct priority…</option>
                       {priorityOptions.map((opt) => (
@@ -192,28 +228,76 @@ export default function SpiritPage() {
           <span>Being true to our promises</span>
         </div>
 
-        <div className="orange-core" aria-label="Living the Orange Spirit">
-          Living the Orange Spirit
+        {/* Pill becomes a select in quiz mode */}
+        <div className="orange-core-wrap">
+          {!quizStarted ? (
+            <div className="orange-core" aria-label="Living the Orange Spirit">
+              Living the Orange Spirit
+            </div>
+          ) : (
+            <select
+              className={`orange-core-select ${
+                !checked ? "neutral" : answers.pill === pillCorrect ? "correct" : "wrong"
+              }`}
+              value={answers.pill}
+              onChange={(e) => updatePill(e.target.value)}
+              aria-label="Select the core statement"
+            >
+              <option value="">Select the core statement…</option>
+              {pillOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="value-grid">
-          {values.map((v) => (
-            <div className="value-box" key={v.label}>
-              <h3>{v.label}</h3>
-              <p>{v.desc}</p>
-            </div>
-          ))}
+          {values.map((v, i) => {
+            const a = answers.values[i];
+            const state =
+              !quizStarted
+                ? ""
+                : !checked || a === ""
+                ? "neutral"
+                : a === v.desc
+                ? "correct"
+                : "wrong";
+            return (
+              <div className={`value-box ${state}`} key={v.label}>
+                <h3>{v.label}</h3>
+                {!quizStarted ? (
+                  <p>{v.desc}</p>
+                ) : (
+                  <>
+                    <label className="sr-only" htmlFor={`value-${i}`}>
+                      {v.label} description
+                    </label>
+                    <select
+                      id={`value-${i}`}
+                      className="value-select"
+                      value={answers.values[i]}
+                      onChange={(e) => updateValueDesc(i, e.target.value)}
+                    >
+                      <option value="">Choose the matching description…</option>
+                      {valueDescOptions.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Quiz controls & score */}
-        {quizMode && (
+        {quizStarted && (
           <div className="quiz-controls">
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={onCheck}
-              disabled={checked && answers.every(a => a !== "")}
-            >
+            <button type="button" className="btn-primary" onClick={onCheck}>
               Check answers
             </button>
             <button type="button" className="btn-secondary" onClick={onReset}>
@@ -222,7 +306,7 @@ export default function SpiritPage() {
 
             {checked && (
               <div className="quiz-score" role="status" aria-live="polite">
-                Score: <strong>{score}</strong> / {priorities.length}
+                Score: <strong>{score}</strong> / {totalQuestions}
               </div>
             )}
           </div>
