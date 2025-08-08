@@ -2,11 +2,11 @@ import React, { useMemo, useState, useEffect } from "react";
 import "../SpiritPage.css";
 
 /**
- * easyJet SpiritPage — Premium v3
- * - View Mode: branded presentation
- * - Quiz Mode: MCQ dropdowns (randomized), one-way switch
- * - Instant feedback: ✅ fade green / ❌ shake red
- * - Strict containment: no visual overflow/clipping
+ * easyJet SpiritPage — Presentation Build
+ * - View Mode: branded, premium layout
+ * - Quiz Mode: randomized dropdown MCQs with instant feedback
+ * - One-way switch to Quiz Mode (locked)
+ * - Strict containment: no overflow/clipping at any breakpoint
  */
 
 const DATA = {
@@ -138,7 +138,7 @@ const Tag = ({ children, tone = "primary" }) => (
 );
 
 const Card = ({ children, className = "" }) => (
-  <div className={`ej-card ${className}`}>{children}</div>
+  <article className={`ej-card ${className}`}>{children}</article>
 );
 
 export default function SpiritPage() {
@@ -162,7 +162,7 @@ export default function SpiritPage() {
       const row = document.getElementById(`row-${id}`);
       if (row) {
         row.classList.remove("shake-now");
-        // reflow
+        // force reflow
         // eslint-disable-next-line no-unused-expressions
         row.offsetHeight;
         row.classList.add("shake-now");
@@ -173,7 +173,6 @@ export default function SpiritPage() {
 
   return (
     <div className="spirit-root">
-      {/* Decorative orange rail left */}
       <div className="ej-rail" aria-hidden />
 
       <header className="ej-header">
@@ -190,24 +189,20 @@ export default function SpiritPage() {
             onClick={() => setQuizMode(true)}
             disabled={locked}
             aria-disabled={locked}
-            title={
-              locked
-                ? "Once you enter Quiz Mode, you can’t go back."
-                : "Switch to Quiz Mode"
-            }
+            title={locked ? "Quiz Mode is locked" : "Switch to Quiz Mode"}
           >
             {locked ? "Quiz Mode" : "Start Quiz"}
           </button>
         </div>
       </header>
 
-      {/* guard keeps everything inside the visual frame */}
+      {/* Guarded canvas to prevent any bleed/clipping */}
       <div className="ej-guard">
         {!quizMode ? (
           <main className="ej-content">
             {/* Purpose / Destination */}
             <section className="ej-grid ej-grid-2">
-              <Card className="elev fade-in">
+              <Card className="card-hero fade-in">
                 <div className="ej-card-head">
                   <Tag>Purpose</Tag>
                   <h2 className="ej-h2">Making low-cost travel easy</h2>
@@ -218,7 +213,7 @@ export default function SpiritPage() {
                 </p>
               </Card>
 
-              <Card className="elev fade-in">
+              <Card className="card-hero fade-in">
                 <div className="ej-card-head">
                   <Tag tone="neutral">Destination</Tag>
                   <h2 className="ej-h2">
@@ -242,7 +237,7 @@ export default function SpiritPage() {
 
               <div className="ej-grid ej-grid-4">
                 {DATA.priorities.map((p, i) => (
-                  <Card key={i} className="elev card-priority slide-in">
+                  <Card key={i} className="slide-in">
                     <h4 className="ej-card-title">{p.label}</h4>
                     <p className="ej-card-copy">
                       Focused execution to strengthen the core and unlock
@@ -262,7 +257,7 @@ export default function SpiritPage() {
 
               <div className="ej-grid ej-grid-3">
                 {DATA.beOrange.map((v, i) => (
-                  <Card key={i} className="elev card-orange fade-in">
+                  <Card key={i} className="fade-in">
                     <div className="ej-subtle">{v.hint}</div>
                     <h4 className="ej-card-title">{v.label}</h4>
                     <p className="ej-card-copy">
@@ -288,7 +283,7 @@ export default function SpiritPage() {
             <section className="ej-quiz">
               {["Purpose", "Destination", "Priorities", "BE ORANGE"].map(
                 (group) => (
-                  <div key={group} className="ej-quiz-group elev">
+                  <div key={group} className="ej-quiz-group">
                     <div className="ej-section-head compact">
                       <Tag>{group}</Tag>
                       <h3 className="group-title ej-h3">{group}</h3>
@@ -302,6 +297,7 @@ export default function SpiritPage() {
                           const val = answers[q.id] ?? "";
                           const isCorrect = st === "correct";
                           const isWrong = st === "wrong";
+
                           return (
                             <div
                               id={`row-${q.id}`}
