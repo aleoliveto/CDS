@@ -1,20 +1,19 @@
 /* ---------- Global Layout ---------- */
-
 html, body, #root {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
-  background: #121212;
+  background: #0e0e0e;
   font-family: 'Segoe UI', Tahoma, sans-serif;
   display: flex;
   justify-content: center;
+  color-scheme: dark;
 }
 
 /* ---------- Root Game Layout ---------- */
-
 .game-container {
-  background: #121212;
+  background: linear-gradient(160deg, #121212, #1a1a1a);
   color: #f0f0f0;
   min-height: 100vh;
   width: 100%;
@@ -25,10 +24,10 @@ html, body, #root {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  animation: fadein 0.5s ease-out;
 }
 
 /* ---------- HUD Bar ---------- */
-
 .hud-bar {
   display: flex;
   justify-content: center;
@@ -36,18 +35,39 @@ html, body, #root {
   gap: 1rem;
   background: #1e1e1e;
   padding: 1rem 2rem;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #333;
   width: 100%;
   max-width: 1000px;
   margin-bottom: 1.5rem;
   font-size: 0.95rem;
   font-weight: 500;
-  box-shadow: 0 0 6px #00000080;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  transition: all 0.3s ease;
+}
+
+.hud-bar span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hud-bar button {
+  background: #ff6600;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+.hud-bar button:hover {
+  background-color: #e65c00;
+  box-shadow: 0 0 8px #ff6600aa;
 }
 
 /* ---------- Timeline Navigation ---------- */
-
 .timeline {
   display: flex;
   justify-content: center;
@@ -60,7 +80,7 @@ html, body, #root {
 
 .timeline-step {
   padding: 0.5rem 0.75rem;
-  background: #292929;
+  background: #2b2b2b;
   border: 1px solid #444;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -68,18 +88,20 @@ html, body, #root {
   color: #ccc;
   text-align: center;
   text-transform: uppercase;
-  transition: 0.3s;
   cursor: default;
+  transition: background-color 0.3s ease, transform 0.15s ease;
 }
-
+.timeline-step:hover {
+  background-color: #343434;
+}
 .timeline-step.active {
-  background: #ff6600;
+  background: linear-gradient(135deg, #ff6600, #ff8533);
   color: #fff;
   box-shadow: 0 0 10px #ff660088;
+  transform: scale(1.05);
 }
 
 /* ---------- Event Feed ---------- */
-
 .event-feed {
   background: #1b1b1b;
   border: 1px solid #333;
@@ -92,23 +114,22 @@ html, body, #root {
   max-height: 250px;
   scrollbar-width: thin;
   scrollbar-color: #ff6600 #1b1b1b;
+  animation: fadein 0.4s ease-in;
 }
 
 .event-feed::-webkit-scrollbar {
   width: 8px;
 }
-
 .event-feed::-webkit-scrollbar-thumb {
   background-color: #ff6600;
   border-radius: 4px;
 }
-
 .event-feed h3 {
   margin-top: 0;
   font-size: 1.2rem;
-  color: #ff6600;
+  color: #ff8533;
+  text-shadow: 0 0 4px #000;
 }
-
 .event-msg {
   background: #262626;
   padding: 0.75rem;
@@ -117,10 +138,29 @@ html, body, #root {
   border-radius: 6px;
   font-size: 0.95rem;
   word-break: break-word;
+  transition: transform 0.15s ease;
+}
+.event-msg:hover {
+  transform: scale(1.01);
 }
 
-/* ---------- Cockpit Tools ---------- */
+/* ---------- Leaderboard ---------- */
+.event-feed table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.event-feed th, .event-feed td {
+  padding: 6px;
+  text-align: left;
+}
+.event-feed tr:nth-child(even) {
+  background: #222;
+}
+.event-feed tr:hover {
+  background: #2a2a2a;
+}
 
+/* ---------- Tools Panel ---------- */
 .tools-panel {
   background: #222;
   border: 1px solid #333;
@@ -129,21 +169,19 @@ html, body, #root {
   width: 100%;
   max-width: 1000px;
   margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
 }
-
 .tools-panel h3 {
   margin-top: 0;
   font-size: 1.3rem;
   color: #ffa500;
   margin-bottom: 1rem;
 }
-
 .cockpit-tools {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-
 .tool-item {
   display: flex;
   align-items: center;
@@ -153,28 +191,23 @@ html, body, #root {
   border-radius: 8px;
   border: 1px solid #444;
   cursor: pointer;
-  user-select: none;
-  transition: background-color 0.25s ease;
+  transition: background-color 0.25s ease, transform 0.15s ease;
 }
-
 .tool-item:hover {
   background-color: #3a3a3a;
+  transform: translateY(-1px);
 }
-
 .tool-item input[type="checkbox"] {
   margin-right: 1rem;
   transform: scale(1.25);
   cursor: pointer;
-  vertical-align: middle;
 }
 
 /* ---------- Advance Button ---------- */
-
 .advance-phase {
   margin: 2rem 0 2.5rem;
   text-align: center;
 }
-
 .advance-phase button {
   width: 220px;
   font-size: 1.15rem;
@@ -186,16 +219,15 @@ html, body, #root {
   cursor: pointer;
   font-weight: bold;
   box-shadow: 0 5px 10px #ff660033;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
 }
-
 .advance-phase button:hover {
   background-color: #e65c00;
   box-shadow: 0 8px 15px #ff660055;
+  transform: translateY(-2px);
 }
 
 /* ---------- Captain Log ---------- */
-
 .log-panel {
   width: 100%;
   max-width: 1000px;
@@ -211,23 +243,19 @@ html, body, #root {
   scrollbar-width: thin;
   scrollbar-color: #ff6600 #161616;
 }
-
 .log-panel::-webkit-scrollbar {
   width: 8px;
 }
-
 .log-panel::-webkit-scrollbar-thumb {
   background-color: #ff6600;
   border-radius: 4px;
 }
-
 .log-panel h4 {
   margin-top: 0;
   font-size: 1.15rem;
   color: #ffa500;
   margin-bottom: 1rem;
 }
-
 .log-panel ul {
   list-style: disc;
   padding-left: 1.5rem;
@@ -235,7 +263,6 @@ html, body, #root {
 }
 
 /* ---------- Modal Overlay ---------- */
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -247,12 +274,12 @@ html, body, #root {
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  animation: fadein 0.3s ease-out;
 }
 
 /* ---------- Modal Content ---------- */
-
 .modal-content {
-  background: #222;
+  background: #1f1f1f;
   border-radius: 12px;
   padding: 2rem;
   max-width: 600px;
@@ -261,10 +288,10 @@ html, body, #root {
   position: relative;
   box-shadow: 0 0 25px #ff6600cc;
   color: white;
+  animation: fadein 0.4s ease-out;
 }
 
 /* ---------- Modal Close Button ---------- */
-
 .modal-close-btn {
   position: absolute;
   top: 0.5rem;
@@ -275,10 +302,13 @@ html, body, #root {
   color: #ff6600;
   cursor: pointer;
   line-height: 1;
+  transition: transform 0.2s ease;
+}
+.modal-close-btn:hover {
+  transform: rotate(90deg);
 }
 
 /* ---------- Modal Choice Buttons ---------- */
-
 .modal-choice-btn {
   display: block;
   width: 100%;
@@ -291,15 +321,173 @@ html, body, #root {
   border-radius: 8px;
   color: white;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.15s ease;
   text-align: center;
 }
-
 .modal-choice-btn:hover {
   background-color: #e65c00;
+  transform: translateY(-1px);
+}
+/* ---------- Admin Dashboard Styles ---------- */
+
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1100px;
 }
 
+.admin-section {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  width: 100%;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+.admin-section h3 {
+  margin-top: 0;
+  color: #ffa500;
+  font-size: 1.3rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+/* ---------- Leaderboard Table ---------- */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.leaderboard-table th, .leaderboard-table td {
+  padding: 0.6rem;
+  text-align: left;
+}
+
+.leaderboard-table thead {
+  background: #292929;
+}
+
+.leaderboard-table th {
+  color: #ff8533;
+  font-weight: bold;
+}
+
+.leaderboard-table tr:nth-child(even) {
+  background: #222;
+}
+
+.leaderboard-table tr:hover {
+  background: #2a2a2a;
+}
+
+/* ---------- Phase Control ---------- */
+.phase-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.phase-controls button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.phase-prev {
+  background: #444;
+  color: #fff;
+}
+.phase-prev:hover {
+  background: #555;
+}
+
+.phase-next {
+  background: #ff6600;
+  color: #fff;
+}
+.phase-next:hover {
+  background: #e65c00;
+  box-shadow: 0 0 10px #ff6600aa;
+}
+
+/* ---------- Lock Button ---------- */
+.lock-btn {
+  margin-left: auto;
+  background: #ff6600;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+.lock-btn:hover {
+  background-color: #e65c00;
+  box-shadow: 0 0 8px #ff6600aa;
+}
+
+/* ---------- Event Form ---------- */
+.event-form textarea,
+.event-form input,
+.event-form select {
+  background: #2b2b2b;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 0.5rem;
+  color: white;
+  width: 100%;
+  font-size: 0.95rem;
+}
+
+.event-form button {
+  background: #ff6600;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+.event-form button:hover {
+  background-color: #e65c00;
+  box-shadow: 0 0 8px #ff6600aa;
+}
+
+/* ---------- Status Tags ---------- */
+.status-tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.status-active {
+  background: #2b7a2b;
+  color: #c8f7c5;
+}
+
+.status-inactive {
+  background: #8b2b2b;
+  color: #f7c5c5;
+}
+
+/* ---------- Animations ---------- */
 @keyframes fadein {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }

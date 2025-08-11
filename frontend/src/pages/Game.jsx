@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { GAME_PHASES } from "../phases";
 import "../FlightDeck.css";
 import CockpitTools from "../components/CockpitTools";
@@ -7,6 +8,10 @@ import { supabase } from "../supabaseClient";
 const EVENT_DURATION_SECONDS = 120;
 
 export default function Game() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [player, setPlayer] = useState(null); // { id, name, surname, base, aircraft }
   const [currentPhase, setCurrentPhase] = useState(0);
   const [log, setLog] = useState([]);
   const [eventFeed, setEventFeed] = useState([]);
@@ -18,29 +23,152 @@ export default function Game() {
   const [fetchError, setFetchError] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+
   const timerRef = useRef(null);
+  const handledIdsRef = useRef(new Set());   // local session "handled"
+  const submittedIdsRef = useRef(new Set()); // server-persisted handled
 
-  const [captain] = useState({
-    name: "Alessandro Oliveto",
-    base: "LTN",
-    aircraft: "G-EZUK",
-  });
+  // Helpers
+  const formatTime = (seconds) =>
+    `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${(seconds % 60)
+      .toString()
+      .padStart(2, "0")}`;
 
-  // Fetch events and listen for updates
+  // Bootstrap player from router or localStorage
   useEffect(() => {
+    const statePlayer = location.state;
+    if (statePlayer?.playerId) {
+      setPlayer({
+        id: statePlayer.playerId,
+        name: statePlayer.name,
+        surname: statePlayer.surname,
+        base: statePlayer.base,
+        aircraft: statePlayer.aircraft || null,
+      });
+      return;
+    }
+    const stored = localStorage.getItem("player");
+    if (stored) {
+      try {
+        const p = JSON.parse(stored);
+        if (p?.id) setPlayer(p);
+      } catch (err) {
+        console.warn("Invalid player JSON in localStorage, clearing.", err);
+        localStorage.removeItem("player");
+      }
+    }
+  }, [location.state]);
+
+  // If no player, bounce to login
+  useEffect(() => {
+    if (player === null) return; // still checking
+    if (!player) navigate("/");
+  }, [player, navigate]);
+
+  // Load player's score/phase and subscribe to row changes; seed submissions
+  useEffect(() => {
+    if (!player?.id) return;
+
+    let isMounted = true;
+
+    const loadPlayerRow = async () => {
+      const { data, error } = await supabase
+        .from("players")
+        .select("phase_index, score, aircraft")
+        .eq("id", player.id)
+        .single();
+      if (!isMounted) return;
+      if (!error && data) {
+        setCurrentPhase(data.phase_index ?? 0);
+        setScore(data.score ?? 0);
+        if (data.aircraft) {
+          setPlayer((prev) => ({ ...prev, aircraft: data.aircraft }));
+          localStorage.setItem(
+            "player",
+            JSON.stringify({ ...player, aircraft: data.aircraft })
+          );
+        }
+      }
+    };
+
+    const loadSubmissionsSnapshot = async () => {
+      const { data, error } = await supabase
+        .from("submissions")
+        .select("event_id")
+        .eq("player_id", player.id);
+      if (!isMounted) return;
+      if (!error && Array.isArray(data)) {
+        const ids = new Set(data.map((r) => r.event_id));
+        submittedIdsRef.current = ids;
+        handledIdsRef.current = new Set(ids); // handled includes submitted
+      }
+    };
+
+    loadPlayerRow();
+    loadSubmissionsSnapshot();
+
+    const channel = supabase.channel(`player-${player.id}`);
+    channel.on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "players", filter: `id=eq.${player.id}` },
+      (payload) => {
+        const row = payload.new;
+        if (typeof row.score === "number") setScore(row.score);
+        if (typeof row.phase_index === "number") setCurrentPhase(row.phase_index);
+      }
+    );
+    channel.subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [player?.id, player]);
+
+  // Fetch events + realtime for current base/phase. Also refresh submissions snapshot.
+  useEffect(() => {
+    if (!player?.base) return;
+
+    let isMounted = true;
+
+    // Refresh submissions snapshot when base/phase changes
+    const refreshSubmissions = async () => {
+      if (!player?.id) return;
+      const { data } = await supabase
+        .from("submissions")
+        .select("event_id")
+        .eq("player_id", player.id);
+      const ids = new Set((data || []).map((r) => r.event_id));
+      submittedIdsRef.current = ids;
+      handledIdsRef.current = new Set(ids);
+    };
+
     const fetchEvents = async () => {
       setLoadingEvents(true);
       setFetchError(null);
+
       const { data, error } = await supabase
         .from("events")
         .select("*")
-        .eq("base", captain.base)
+        .eq("base", player.base)
         .eq("phase", GAME_PHASES[currentPhase])
-        .order("timestamp", { ascending: false });
+        .order("timestamp", { ascending: false }); // change to created_at if needed
+
+      if (!isMounted) return;
 
       if (!error) {
-        setEventFeed(data);
-        if (data && data.length > 0) setActiveEvent(data[0]);
+        const rows = data || [];
+
+        // Filter out events already submitted by this player
+        const filtered = rows.filter((e) => !submittedIdsRef.current.has(e.id));
+        setEventFeed(filtered);
+
+        const firstUnseen = filtered.find((e) => !handledIdsRef.current.has(e.id));
+        if (firstUnseen && !isLocked) {
+          setActiveEvent(firstUnseen);
+        } else {
+          setActiveEvent(null);
+        }
       } else {
         setFetchError("Failed to load events. Please try again later.");
         console.error(error.message);
@@ -49,101 +177,156 @@ export default function Game() {
       setLoadingEvents(false);
     };
 
-    fetchEvents();
+    (async () => {
+      await refreshSubmissions();
+      await fetchEvents();
+    })();
 
-    const channel = supabase.channel(`game-${captain.base}`);
+    const channel = supabase.channel(`game-${player.base}-${GAME_PHASES[currentPhase]}`);
 
-    channel
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "events",
-          filter: `base=eq.${captain.base},phase=eq.${GAME_PHASES[currentPhase]}`,
-        },
-        (payload) => {
-          const newEvent = payload.new;
+    // New events for this base
+    channel.on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "events",
+        filter: `base=eq.${player.base}`,
+      },
+      (payload) => {
+        const newEvent = payload.new;
 
-          setEventFeed((prev) => {
-            const alreadyExists = prev.some((e) => e.id === newEvent.id);
-            if (alreadyExists) return prev;
-            return [newEvent, ...prev];
-          });
+        // Only react to current phase
+        if (newEvent.phase !== GAME_PHASES[currentPhase]) return;
 
-          if (!activeEvent && !isModalOpen && !isLocked) {
-            setActiveEvent(newEvent);
-          } else {
-            setToastMessage("📣 New event received!");
-            setTimeout(() => setToastMessage(null), 3000);
-          }
+        // If already submitted by this player, ignore
+        if (submittedIdsRef.current.has(newEvent.id)) return;
+
+        setEventFeed((prev) => {
+          const exists = prev.some((e) => e.id === newEvent.id);
+          return exists ? prev : [newEvent, ...prev];
+        });
+
+        if (
+          !handledIdsRef.current.has(newEvent.id) &&
+          !activeEvent &&
+          !isModalOpen &&
+          !isLocked
+        ) {
+          setActiveEvent(newEvent);
+        } else {
+          setToastMessage("📣 New event received");
+          setTimeout(() => setToastMessage(null), 2500);
         }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "game_state",
-          filter: `base=eq.${captain.base}`,
-        },
-        (payload) => {
-          setCurrentPhase(payload.new.phase_index);
-          setEventFeed([]);
-          setActiveEvent(null);
-          setTimeLeft(EVENT_DURATION_SECONDS);
-          setIsModalOpen(false);
-          setLog((prev) => [
-            ...prev,
-            `✈ Phase updated remotely to "${GAME_PHASES[payload.new.phase_index]}"`,
-          ]);
+      }
+    );
+
+    // Phase changes from Admin (global)
+    channel.on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "game_state",
+        filter: `base=eq.${player.base}`,
+      },
+      async (payload) => {
+        const idx = payload.new.phase_index ?? 0;
+        setCurrentPhase(idx);
+        setEventFeed([]);
+        setActiveEvent(null);
+        setTimeLeft(EVENT_DURATION_SECONDS);
+        setIsModalOpen(false);
+        handledIdsRef.current.clear();
+
+        setLog((prev) => [...prev, `✈ Phase updated to "${GAME_PHASES[idx]}"`]);
+
+        // Mirror on player row
+        if (player?.id) {
+          await supabase.from("players").update({ phase_index: idx }).eq("id", player.id);
         }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "locks",
-          filter: `base=eq.${captain.base}`,
-        },
-        (payload) => {
-          const locked = payload.new.is_locked;
-          setIsLocked(locked);
-          setIsModalOpen(false);
-          setActiveEvent(null);
-          setTimeLeft(EVENT_DURATION_SECONDS);
-          setLog((prev) => [
-            ...prev,
-            locked
-              ? "🚫 Admin locked the game. Waiting for unlock."
-              : "✅ Game unlocked by Admin. You may resume.",
-          ]);
-        }
-      )
-      .subscribe();
+
+        // Refresh submissions for the new phase context
+        const { data } = await supabase
+          .from("submissions")
+          .select("event_id")
+          .eq("player_id", player.id);
+        const ids = new Set((data || []).map((r) => r.event_id));
+        submittedIdsRef.current = ids;
+        handledIdsRef.current = new Set(ids);
+      }
+    );
+
+    // Locks from Admin
+    channel.on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "locks",
+        filter: `base=eq.${player.base}`,
+      },
+      (payload) => {
+        const locked = payload.new.is_locked;
+        setIsLocked(locked);
+        setIsModalOpen(false);
+        setActiveEvent(null);
+        setTimeLeft(EVENT_DURATION_SECONDS);
+        setLog((prev) => [
+          ...prev,
+          locked
+            ? "🚫 Admin locked the game. Waiting for unlock."
+            : "✅ Game unlocked by Admin. You may resume.",
+        ]);
+      }
+    );
+
+    channel.subscribe();
 
     return () => {
+      isMounted = false;
       supabase.removeChannel(channel);
     };
-  }, [captain.base, currentPhase, activeEvent, isModalOpen, isLocked]);
+  }, [player?.base, currentPhase]); // keep deps minimal to avoid refetch loops
 
+  // Timeout handler (records submission)
+  const handleTimeout = useCallback(() => {
+    (async () => {
+      if (player?.id && activeEvent?.id) {
+        const { error } = await supabase.from("submissions").insert({
+          player_id: player.id,
+          event_id: activeEvent.id,
+          status: "timeout",
+          choice_text: null,
+          score_delta: 0,
+        });
+        if (error) console.error("submissions timeout insert error:", error);
+        submittedIdsRef.current.add(activeEvent.id);
+      }
+      if (activeEvent?.id) handledIdsRef.current.add(activeEvent.id);
+      setLog((prev) => [
+        ...prev,
+        `${GAME_PHASES[currentPhase]}: Event timed out without response.`,
+      ]);
+      setIsModalOpen(false);
+      setActiveEvent(null);
+    })();
+  }, [player?.id, activeEvent?.id, currentPhase]);
+
+  // Open/close modal based on activeEvent
   useEffect(() => {
-    if (
-      activeEvent &&
-      activeEvent.choices &&
-      activeEvent.choices.length > 0 &&
-      currentPhase !== 1
-    ) {
+    if (activeEvent?.choices?.length > 0) {
       setIsModalOpen(true);
       setTimeLeft(EVENT_DURATION_SECONDS);
     } else {
       setIsModalOpen(false);
     }
-  }, [activeEvent, currentPhase]);
+  }, [activeEvent]);
 
+  // Countdown while modal is open
   useEffect(() => {
     if (!isModalOpen) return;
+    clearInterval(timerRef.current);
 
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
@@ -157,25 +340,53 @@ export default function Game() {
     }, 1000);
 
     return () => clearInterval(timerRef.current);
-  }, [isModalOpen]);
+  }, [isModalOpen, handleTimeout]);
 
-  const handleTimeout = () => {
+  // After closing a modal, auto-open the next unseen event in the feed
+  useEffect(() => {
+    if (isModalOpen || activeEvent) return;
+    const nextUnseen = eventFeed.find((e) => !handledIdsRef.current.has(e.id));
+    if (nextUnseen && !isLocked) {
+      setActiveEvent(nextUnseen);
+    }
+  }, [isModalOpen, eventFeed, isLocked, activeEvent]);
+
+  const handleEventChoice = async (choice) => {
+    const delta = choice?.score ?? 0;
+    const newScore = (score ?? 0) + delta;
+
+    setScore(newScore);
     setLog((prev) => [
       ...prev,
-      `${GAME_PHASES[currentPhase]}: Event timed out without response.`,
+      `${GAME_PHASES[currentPhase]}: Event "${activeEvent?.message}" - Choice: "${choice?.text}" (+${delta})`,
     ]);
-    setIsModalOpen(false);
-    setActiveEvent(null);
-  };
 
-  const handleEventChoice = (choice) => {
-    setScore((prev) => prev + choice.score);
-    setLog((prev) => [
-      ...prev,
-      `${GAME_PHASES[currentPhase]}: Event "${activeEvent.message}" - Choice: "${choice.text}" (+${choice.score})`,
-    ]);
+    // Persist submission
+    if (player?.id && activeEvent?.id) {
+      const { error } = await supabase.from("submissions").insert({
+        player_id: player.id,
+        event_id: activeEvent.id,
+        status: "answered",
+        choice_text: choice?.text ?? null,
+        score_delta: delta,
+      });
+      if (error) console.error("submissions insert error:", error);
+      submittedIdsRef.current.add(activeEvent.id);
+    }
+
+    // Update score on players
+    if (player?.id) {
+      const { error } = await supabase
+        .from("players")
+        .update({ score: newScore })
+        .eq("id", player.id);
+      if (error) console.error("players score update error:", error);
+    }
+
+    if (activeEvent?.id) handledIdsRef.current.add(activeEvent.id);
     setIsModalOpen(false);
     setActiveEvent(null);
+    setTimeLeft(EVENT_DURATION_SECONDS);
   };
 
   const handleCloseModal = () => {
@@ -184,35 +395,83 @@ export default function Game() {
         "Are you sure you want to dismiss this event? You won't be able to respond."
       )
     ) {
-      setIsModalOpen(false);
-      setActiveEvent(null);
-      setTimeLeft(EVENT_DURATION_SECONDS);
+      (async () => {
+        if (player?.id && activeEvent?.id) {
+          const { error } = await supabase.from("submissions").insert({
+            player_id: player.id,
+            event_id: activeEvent.id,
+            status: "dismissed",
+            choice_text: null,
+            score_delta: 0,
+          });
+          if (error) console.error("submissions dismiss insert error:", error);
+          submittedIdsRef.current.add(activeEvent.id);
+        }
+        if (activeEvent?.id) handledIdsRef.current.add(activeEvent.id);
+        setIsModalOpen(false);
+        setActiveEvent(null);
+        setTimeLeft(EVENT_DURATION_SECONDS);
+      })();
     }
   };
 
-  const handleLogAction = (msg, scoreBoost = 0) => {
+  const handleLogAction = async (msg, scoreBoost = 0) => {
     setLog((prev) => [...prev, `${GAME_PHASES[currentPhase]}: ${msg}`]);
-    if (scoreBoost > 0) setScore((prev) => prev + scoreBoost);
+    if (scoreBoost > 0) {
+      const newScore = (score ?? 0) + scoreBoost;
+      setScore(newScore);
+      if (player?.id) {
+        const { error } = await supabase
+          .from("players")
+          .update({ score: newScore })
+          .eq("id", player.id);
+        if (error) console.error("players score update error:", error);
+      }
+    }
   };
 
-  const handlePhaseAdvance = () => {
+  const handlePhaseAdvance = async () => {
     if (currentPhase < GAME_PHASES.length - 1) {
-      setCurrentPhase((prev) => prev + 1);
+      const next = currentPhase + 1;
+      setCurrentPhase(next);
       setEventFeed([]);
       setActiveEvent(null);
       setTimeLeft(EVENT_DURATION_SECONDS);
       setIsModalOpen(false);
+      handledIdsRef.current.clear();
+
+      if (player?.id) {
+        const { error } = await supabase
+          .from("players")
+          .update({ phase_index: next })
+          .eq("id", player.id);
+        if (error) console.error("players phase update error:", error);
+      }
+
+      // refresh submissions snapshot for new phase context
+      if (player?.id) {
+        const { data } = await supabase
+          .from("submissions")
+          .select("event_id")
+          .eq("player_id", player.id);
+        const ids = new Set((data || []).map((r) => r.event_id));
+        submittedIdsRef.current = ids;
+        handledIdsRef.current = new Set(ids);
+      }
     }
   };
 
-  const formatTime = (seconds) =>
-    `${Math.floor(seconds / 60).toString().padStart(2, "0")}:${(seconds % 60)
-      .toString()
-      .padStart(2, "0")}`;
+  if (!player) {
+    return (
+      <div className="game-container">
+        <p style={{ color: "white" }}>Loading player…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="game-container" role="main">
-      {/* Toast notification */}
+      {/* Toast */}
       {toastMessage && (
         <div
           style={{
@@ -220,7 +479,7 @@ export default function Game() {
             top: "1rem",
             right: "1rem",
             backgroundColor: "#ff6600",
-            color: "#fff",
+            color: "white",
             padding: "1rem",
             borderRadius: "0.5rem",
             boxShadow: "0 0 10px rgba(0,0,0,0.3)",
@@ -233,7 +492,7 @@ export default function Game() {
         </div>
       )}
 
-      {/* Lock screen overlay */}
+      {/* Lock overlay */}
       {isLocked && (
         <div className="modal-overlay" style={{ zIndex: 9999 }}>
           <div className="modal-content">
@@ -244,11 +503,21 @@ export default function Game() {
       )}
 
       <div className="hud-bar" aria-label="Captain Info">
-        <span><strong>Captain:</strong> {captain.name}</span>
-        <span><strong>Base:</strong> {captain.base}</span>
-        <span><strong>Aircraft:</strong> {captain.aircraft}</span>
-        <span><strong>Phase:</strong> {GAME_PHASES[currentPhase]}</span>
-        <span><strong>Score:</strong> {score}</span>
+        <span>
+          <strong>Captain:</strong> {player.name} {player.surname}
+        </span>
+        <span>
+          <strong>Base:</strong> {player.base}
+        </span>
+        <span>
+          <strong>Aircraft:</strong> {player.aircraft || "—"}
+        </span>
+        <span>
+          <strong>Phase:</strong> {GAME_PHASES[currentPhase]}
+        </span>
+        <span>
+          <strong>Score:</strong> {score}
+        </span>
       </div>
 
       <div className="score-bar-container" aria-label="Score progress bar">
@@ -273,7 +542,7 @@ export default function Game() {
         ))}
       </div>
 
-      {isModalOpen && (
+      {isModalOpen && activeEvent && (
         <div
           className="modal-overlay"
           onClick={handleCloseModal}
@@ -293,7 +562,7 @@ export default function Game() {
             <h3 id="event-modal-title">{activeEvent.message}</h3>
             <p id="event-modal-description">Time left: {formatTime(timeLeft)}</p>
 
-            {activeEvent.choices.map((choice, idx) => (
+            {activeEvent.choices?.map((choice, idx) => (
               <button
                 key={idx}
                 className="modal-choice-btn"
@@ -310,27 +579,24 @@ export default function Game() {
         <h3>Event Feed (Historic)</h3>
         {loadingEvents && <p>Loading events...</p>}
         {fetchError && <p className="error-text">{fetchError}</p>}
-        {!loadingEvents && !fetchError && eventFeed.length === 0 && (
-          <p>No events yet.</p>
-        )}
-        {!loadingEvents && !fetchError && eventFeed.length > 0 &&
+        {!loadingEvents && !fetchError && eventFeed.length === 0 && <p>No events yet.</p>}
+        {!loadingEvents &&
+          !fetchError &&
+          eventFeed.length > 0 &&
           eventFeed.map((event) => (
             <div key={event.id} className="event-msg">
               {event.message}
             </div>
-          ))
-        }
+          ))}
       </div>
 
       <div className="tools-panel">
         <h3>Cockpit Tools</h3>
         <CockpitTools
           currentPhase={currentPhase}
-          base={captain.base}
+          base={player.base}
           onLogAction={handleLogAction}
-          onScoreBoost={(amount) =>
-            console.log(`+${amount} bonus points earned`)
-          }
+          onScoreBoost={(amount) => console.log(`+${amount} bonus points earned`)}
         />
       </div>
 

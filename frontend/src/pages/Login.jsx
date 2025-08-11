@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../FlightDeck.css"; // or your global styles
+import "../FlightDeck.css";
+import { supabase } from "../supabaseClient";
 
 export default function Login() {
   const [name, setName] = useState("");
@@ -8,26 +9,71 @@ export default function Login() {
   const [base, setBase] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    const trimmedName = name.trim().toLowerCase();
-    const trimmedBase = base.trim().toUpperCase();
+  // Helper functions to normalize user input
+  const norm = (s) => s.replace(/\s+/g, " ").trim();
+  const cap = (s) =>
+    norm(s)
+      .split(" ")
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ""))
+      .join(" ");
 
-    if (!trimmedName || !surname.trim() || !trimmedBase) {
+  const handleLogin = async () => {
+    const nameN = cap(name);
+    const surnameN = cap(surname);
+    const baseN = base.trim().toUpperCase();
+
+    if (!nameN || !surnameN || !baseN) {
       alert("Please fill in all fields.");
       return;
     }
 
-    if (trimmedName === "admin") {
-      navigate(`/admin/${trimmedBase}`);
-    } else {
-      navigate("/game", {
-        state: {
-          name: name.trim(),
-          surname: surname.trim(),
-          base: trimmedBase,
-        },
-      });
+    // Route admin to admin page
+    if (nameN.toLowerCase() === "admin") {
+      navigate(`/admin/${baseN}`);
+      return;
     }
+
+    // Prepare the row payload
+    const payload = { name: nameN, surname: surnameN, base: baseN };
+
+    // Upsert into players table
+    const { data, error } = await supabase
+      .from("players")
+      .upsert(payload, {
+        onConflict: "name,surname,base", // plain column names for index
+        ignoreDuplicates: false,
+      })
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error(error);
+      alert("Could not create or find your player. Please try again.");
+      return;
+    }
+
+    // Save to localStorage for Game.jsx
+    localStorage.setItem(
+      "player",
+      JSON.stringify({
+        id: data.id,
+        name: data.name,
+        surname: data.surname,
+        base: data.base,
+        aircraft: data.aircraft || null,
+      })
+    );
+
+    // Navigate to game with state
+    navigate("/game", {
+      state: {
+        playerId: data.id,
+        name: data.name,
+        surname: data.surname,
+        base: data.base,
+        aircraft: data.aircraft || null,
+      },
+    });
   };
 
   return (
