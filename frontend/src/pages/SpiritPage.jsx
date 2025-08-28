@@ -166,7 +166,7 @@ export default function SpiritPage() {
   return (
     <div className="spirit-root">
       <header className="ej-header">
-        <h1 className="ej-title">easyJet Spirit</h1>
+        <h1 className="ej-title">easyJet Strategy</h1>
         <div className="ej-mode">
           <span className={`mode-pill ${quizMode ? "active" : ""}`}>
             {quizMode ? "Quiz Mode (locked)" : "View Mode"}
