@@ -111,7 +111,7 @@ html, body, #root {
   border-radius: 8px;
   margin-bottom: 2rem;
   overflow-y: auto;
-  max-height: 250px;
+  max-height: 400px;
   scrollbar-width: thin;
   scrollbar-color: #ff6600 #1b1b1b;
   animation: fadein 0.4s ease-in;
